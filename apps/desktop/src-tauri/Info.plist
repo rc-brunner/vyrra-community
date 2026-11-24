@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>NSMicrophoneUsageDescription</key>
+  <string>Vyrra uses the microphone only after you explicitly start a voice capture.</string>
+  <key>NSScreenCaptureUsageDescription</key>
+  <string>Vyrra uses screen capture only after you explicitly select content for Quick Clip or an approved meeting source.</string>
+  <key>NSHumanReadableCopyright</key>
+  <string>Copyright © 2026 Runner Concepts. All rights reserved.</string>
+</dict>
+</plist>

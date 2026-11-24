@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en" data-appearance="system" data-accent="mono">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="Vyrra Desktop — a private, local-first voice workspace"
+    />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      (() => {
+        if ("scrollRestoration" in history) {
+          history.scrollRestoration = "manual";
+        }
+
+        try {
+          const storedAppearance = localStorage.getItem(
+            "pvw.appearance.theme",
+          );
+          const storedAccent = localStorage.getItem("pvw.appearance.accent");
+          const appearances = ["system", "light", "dark"];
+          const accents = ["mono", "forest", "indigo", "ocean", "plum", "ember"];
+          const legacy = {
+            canvas: ["light", "ember"],
+            studio: ["dark", "mono"],
+            grove: ["light", "forest"],
+            signal: ["light", "ocean"],
+            contrast: ["dark", "mono"],
+          };
+          const migrated = legacy[storedAppearance];
+          document.documentElement.dataset.appearance = appearances.includes(
+            storedAppearance,
+          )
+            ? storedAppearance
+            : migrated?.[0] ?? "system";
+          document.documentElement.dataset.accent = accents.includes(
+            storedAccent,
+          )
+            ? storedAccent
+            : migrated?.[1] ?? "mono";
+        } catch {
+          document.documentElement.dataset.appearance = "system";
+          document.documentElement.dataset.accent = "mono";
+        }
+      })();
+    </script>
+    <title>Vyrra Desktop</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

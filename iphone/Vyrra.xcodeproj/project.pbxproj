@@ -1,0 +1,1047 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A1B2C3D4E5F6000000000101 /* VyrraApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000201 /* VyrraApp.swift */; };
+		A1B2C3D4E5F6000000000102 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000202 /* ContentView.swift */; };
+		A1B2C3D4E5F6000000000103 /* TranscriptionRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000203 /* TranscriptionRecord.swift */; };
+		A1B2C3D4E5F6000000000104 /* AudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000204 /* AudioRecorder.swift */; };
+		A1B2C3D4E5F6000000000105 /* TranscriptionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000205 /* TranscriptionEngine.swift */; };
+		A1B2C3D4E5F6000000000106 /* ModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000206 /* ModelManager.swift */; };
+		A1B2C3D4E5F6000000000107 /* TextPolisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000207 /* TextPolisher.swift */; };
+		A1B2C3D4E5F6000000000108 /* ClipboardService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000208 /* ClipboardService.swift */; };
+		A1B2C3D4E5F6000000000109 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000209 /* HapticManager.swift */; };
+		AF14D8C90727000000000103 /* DictationSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF14D8C90727000000000202 /* DictationSound.swift */; };
+		AF14D8C90727000000000104 /* DictationSounds in Resources */ = {isa = PBXBuildFile; fileRef = AF14D8C90727000000000203 /* DictationSounds */; };
+		A1B2C3D4E5F6000000000151 /* DictationAnnouncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000251 /* DictationAnnouncer.swift */; };
+		A1B2C3D4E5F6000000000110 /* RecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000210 /* RecordView.swift */; };
+		A1B2C3D4E5F6000000000111 /* RecordButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000211 /* RecordButton.swift */; };
+		A1B2C3D4E5F6000000000112 /* WaveformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000212 /* WaveformView.swift */; };
+		A1B2C3D4E5F6000000000113 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000213 /* HistoryView.swift */; };
+		A1B2C3D4E5F6000000000114 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000214 /* SettingsView.swift */; };
+		A1B2C3D4E5F6000000000115 /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000215 /* ToastView.swift */; };
+		A1B2C3D4E5F6000000000116 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000216 /* Assets.xcassets */; };
+		A1B2C3D4E5F6000000000117 /* TextPolisherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000217 /* TextPolisherTests.swift */; };
+		A1B2C3D4E5F6000000000118 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D4E5F6000000000802 /* WhisperKit */; };
+		A1B2C3D4E5F6000000000119 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000219 /* PrivacyInfo.xcprivacy */; };
+		A1B2C3D4E5F6000000000120 /* VyrraDesign.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000220 /* VyrraDesign.swift */; };
+		A1B2C3D4E5F6000000000121 /* VisualFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000221 /* VisualFixture.swift */; };
+		A1B2C3D4E5F6000000000122 /* ReadinessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000222 /* ReadinessView.swift */; };
+		A1B2C3D4E5F6000000000123 /* RecordingDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000223 /* RecordingDiagnostics.swift */; };
+		A1B2C3D4E5F6000000000124 /* PersonalizationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000224 /* PersonalizationModels.swift */; };
+		A1B2C3D4E5F6000000000125 /* DictionaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000225 /* DictionaryView.swift */; };
+		A1B2C3D4E5F6000000000126 /* SnippetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000226 /* SnippetsView.swift */; };
+		A1B2C3D4E5F6000000000127 /* StyleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000227 /* StyleView.swift */; };
+		A1B2C3D4E5F6000000000128 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000228 /* ProfileView.swift */; };
+		A1B2C3D4E5F6000000000129 /* AppNavigationRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000229 /* AppNavigationRequest.swift */; };
+		A1B2C3D4E5F6000000000130 /* AppShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000230 /* AppShortcuts.swift */; };
+		A1B2C3D4E5F6000000000131 /* ModelCacheStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000231 /* ModelCacheStore.swift */; };
+		A1B2C3D4E5F6000000000132 /* DictationSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000232 /* DictationSessionController.swift */; };
+		A1B2C3D4E5F6000000000133 /* DictationSessionControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000233 /* DictationSessionControllerTests.swift */; };
+		A1B2C3D4E5F6000000000150 /* VyrraColorContrastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000250 /* VyrraColorContrastTests.swift */; };
+		A1B2C3D4E5F6000000000134 /* ModelCacheStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000234 /* ModelCacheStoreTests.swift */; };
+		A1B2C3D4E5F6000000000135 /* ModelManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000235 /* ModelManagerTests.swift */; };
+		A1B2C3D4E5F6000000000136 /* AppNavigationRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000236 /* AppNavigationRequestTests.swift */; };
+		B0B0C0D0E0F0000000000101 /* KeyboardSharedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B0C0D0E0F0000000000201 /* KeyboardSharedStore.swift */; };
+		B0B0C0D0E0F0000000000102 /* KeyboardSharedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B0C0D0E0F0000000000201 /* KeyboardSharedStore.swift */; };
+		B0B0C0D0E0F0000000000103 /* KeyboardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B0C0D0E0F0000000000204 /* KeyboardViewController.swift */; };
+		B0B0C0D0E0F0000000000104 /* VyrraKeyboard.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = B0B0C0D0E0F0000000000207 /* VyrraKeyboard.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		B0B0C0D0E0F0000000000105 /* KeyboardSharedStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B0C0D0E0F0000000000208 /* KeyboardSharedStoreTests.swift */; };
+		B0B0C0D0E0F0000000000106 /* KeyboardLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B0C0D0E0F0000000000209 /* KeyboardLayout.swift */; };
+		B0B0C0D0E0F0000000000107 /* KeyboardPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B0C0D0E0F000000000020A /* KeyboardPalette.swift */; };
+		B0B0C0D0E0F0000000000108 /* KeyboardWaveformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B0C0D0E0F000000000020B /* KeyboardWaveformView.swift */; };
+		AF14D8C90727000000000101 /* KeyboardDictationPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF14D8C90727000000000201 /* KeyboardDictationPanel.swift */; };
+		AF14D8C90727000000000102 /* KeyboardDictationPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF14D8C90727000000000201 /* KeyboardDictationPanel.swift */; };
+		B0B0C0D0E0F0000000000109 /* KeyboardGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B0C0D0E0F000000000020C /* KeyboardGeometry.swift */; };
+		B0B0C0D0E0F0000000000120 /* KeyboardInputPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B0C0D0E0F0000000000220 /* KeyboardInputPolicy.swift */; };
+		B0B0C0D0E0F000000000010A /* KeyboardGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B0C0D0E0F000000000020C /* KeyboardGeometry.swift */; };
+		B0B0C0D0E0F0000000000121 /* KeyboardInputPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B0C0D0E0F0000000000220 /* KeyboardInputPolicy.swift */; };
+		B0B0C0D0E0F000000000010B /* KeyboardGeometryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B0C0D0E0F000000000020D /* KeyboardGeometryTests.swift */; };
+		B0B0C0D0E0F0000000000122 /* KeyboardInputPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B0C0D0E0F0000000000221 /* KeyboardInputPolicyTests.swift */; };
+		B0B0C0D0E0F000000000010C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B0B0C0D0E0F000000000020E /* Assets.xcassets */; };
+		C1D2E3F4A5B6000000000101 /* VyrraActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B6000000000201 /* VyrraActivityAttributes.swift */; };
+		C1D2E3F4A5B6000000000102 /* VyrraLiveActivityController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B6000000000202 /* VyrraLiveActivityController.swift */; };
+		C1D2E3F4A5B6000000000103 /* VyrraActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B6000000000201 /* VyrraActivityAttributes.swift */; };
+		C1D2E3F4A5B6000000000104 /* VyrraLiveActivityBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B6000000000203 /* VyrraLiveActivityBundle.swift */; };
+		C1D2E3F4A5B6000000000105 /* VyrraLiveActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B6000000000204 /* VyrraLiveActivityWidget.swift */; };
+		C1D2E3F4A5B6000000000106 /* VyrraLiveActivity.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B6000000000206 /* VyrraLiveActivity.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		E1F2A3B4C5D6000000000101 /* VyrraSessionPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F2A3B4C5D6000000000201 /* VyrraSessionPolicy.swift */; };
+		E1F2A3B4C5D6000000000102 /* VyrraSessionPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F2A3B4C5D6000000000201 /* VyrraSessionPolicy.swift */; };
+		E1F2A3B4C5D6000000000103 /* VyrraSessionPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F2A3B4C5D6000000000201 /* VyrraSessionPolicy.swift */; };
+		F2E3D4C5B6A7000000000101 /* PendingRecordingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E3D4C5B6A7000000000201 /* PendingRecordingStore.swift */; };
+		F2E3D4C5B6A7000000000102 /* PendingRecordingStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E3D4C5B6A7000000000202 /* PendingRecordingStoreTests.swift */; };
+		D2E3F4A5B6C7000000000101 /* ThirdPartyLicenses in Resources */ = {isa = PBXBuildFile; fileRef = D2E3F4A5B6C7000000000201 /* ThirdPartyLicenses */; };
+		B0B0C0D0E0F0000000000130 /* KeyboardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B0C0D0E0F0000000000204 /* KeyboardViewController.swift */; };
+		B0B0C0D0E0F0000000000131 /* KeyboardLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B0C0D0E0F0000000000209 /* KeyboardLayout.swift */; };
+		B0B0C0D0E0F0000000000132 /* KeyboardPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B0C0D0E0F000000000020A /* KeyboardPalette.swift */; };
+		B0B0C0D0E0F0000000000133 /* KeyboardWaveformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B0C0D0E0F000000000020B /* KeyboardWaveformView.swift */; };
+		B0B0C0D0E0F0000000000134 /* KeyboardControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B0C0D0E0F0000000000230 /* KeyboardControllerTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A1B2C3D4E5F6000000000901 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A1B2C3D4E5F6000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A1B2C3D4E5F6000000000501;
+			remoteInfo = Vyrra;
+		};
+		B0B0C0D0E0F0000000000901 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A1B2C3D4E5F6000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B0B0C0D0E0F0000000000501;
+			remoteInfo = VyrraKeyboard;
+		};
+		C1D2E3F4A5B6000000000901 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A1B2C3D4E5F6000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C1D2E3F4A5B6000000000501;
+			remoteInfo = VyrraLiveActivity;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		B0B0C0D0E0F0000000000603 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				B0B0C0D0E0F0000000000104 /* VyrraKeyboard.appex in Embed App Extensions */,
+				C1D2E3F4A5B6000000000106 /* VyrraLiveActivity.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		A1B2C3D4E5F6000000000201 /* VyrraApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VyrraApp.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000202 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000203 /* TranscriptionRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionRecord.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000204 /* AudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorder.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000205 /* TranscriptionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionEngine.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000206 /* ModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelManager.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000207 /* TextPolisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextPolisher.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000208 /* ClipboardService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardService.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000209 /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
+		AF14D8C90727000000000202 /* DictationSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationSound.swift; sourceTree = "<group>"; };
+		AF14D8C90727000000000203 /* DictationSounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = DictationSounds; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000251 /* DictationAnnouncer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationAnnouncer.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000210 /* RecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000211 /* RecordButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordButton.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000212 /* WaveformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaveformView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000213 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000214 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000215 /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000216 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000217 /* TextPolisherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextPolisherTests.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000218 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000219 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000220 /* VyrraDesign.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VyrraDesign.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000221 /* VisualFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualFixture.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000222 /* ReadinessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadinessView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000223 /* RecordingDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingDiagnostics.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000224 /* PersonalizationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonalizationModels.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000225 /* DictionaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictionaryView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000226 /* SnippetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetsView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000227 /* StyleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StyleView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000228 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000229 /* AppNavigationRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppNavigationRequest.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000230 /* AppShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppShortcuts.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000231 /* ModelCacheStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelCacheStore.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000232 /* DictationSessionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationSessionController.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000233 /* DictationSessionControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationSessionControllerTests.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000250 /* VyrraColorContrastTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VyrraColorContrastTests.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000234 /* ModelCacheStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelCacheStoreTests.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000235 /* ModelManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelManagerTests.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000236 /* AppNavigationRequestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppNavigationRequestTests.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000301 /* Vyrra.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Vyrra.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1B2C3D4E5F6000000000302 /* VyrraTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VyrraTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B0B0C0D0E0F0000000000201 /* KeyboardSharedStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSharedStore.swift; sourceTree = "<group>"; };
+		B0B0C0D0E0F0000000000202 /* Vyrra.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Vyrra.entitlements; sourceTree = "<group>"; };
+		B0B0C0D0E0F0000000000204 /* KeyboardViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardViewController.swift; sourceTree = "<group>"; };
+		B0B0C0D0E0F0000000000205 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B0B0C0D0E0F0000000000206 /* VyrraKeyboard.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VyrraKeyboard.entitlements; sourceTree = "<group>"; };
+		B0B0C0D0E0F0000000000207 /* VyrraKeyboard.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = VyrraKeyboard.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		B0B0C0D0E0F0000000000208 /* KeyboardSharedStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSharedStoreTests.swift; sourceTree = "<group>"; };
+		B0B0C0D0E0F0000000000209 /* KeyboardLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardLayout.swift; sourceTree = "<group>"; };
+		B0B0C0D0E0F000000000020A /* KeyboardPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardPalette.swift; sourceTree = "<group>"; };
+		B0B0C0D0E0F000000000020B /* KeyboardWaveformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardWaveformView.swift; sourceTree = "<group>"; };
+		AF14D8C90727000000000201 /* KeyboardDictationPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardDictationPanel.swift; sourceTree = "<group>"; };
+		B0B0C0D0E0F000000000020C /* KeyboardGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardGeometry.swift; sourceTree = "<group>"; };
+		B0B0C0D0E0F0000000000220 /* KeyboardInputPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardInputPolicy.swift; sourceTree = "<group>"; };
+		B0B0C0D0E0F000000000020D /* KeyboardGeometryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardGeometryTests.swift; sourceTree = "<group>"; };
+		B0B0C0D0E0F0000000000221 /* KeyboardInputPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardInputPolicyTests.swift; sourceTree = "<group>"; };
+		B0B0C0D0E0F000000000020E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		C1D2E3F4A5B6000000000201 /* VyrraActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VyrraActivityAttributes.swift; sourceTree = "<group>"; };
+		C1D2E3F4A5B6000000000202 /* VyrraLiveActivityController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VyrraLiveActivityController.swift; sourceTree = "<group>"; };
+		C1D2E3F4A5B6000000000203 /* VyrraLiveActivityBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VyrraLiveActivityBundle.swift; sourceTree = "<group>"; };
+		C1D2E3F4A5B6000000000204 /* VyrraLiveActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VyrraLiveActivityWidget.swift; sourceTree = "<group>"; };
+		C1D2E3F4A5B6000000000205 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C1D2E3F4A5B6000000000206 /* VyrraLiveActivity.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = VyrraLiveActivity.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		E1F2A3B4C5D6000000000201 /* VyrraSessionPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VyrraSessionPolicy.swift; sourceTree = "<group>"; };
+		F2E3D4C5B6A7000000000201 /* PendingRecordingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingRecordingStore.swift; sourceTree = "<group>"; };
+		F2E3D4C5B6A7000000000202 /* PendingRecordingStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingRecordingStoreTests.swift; sourceTree = "<group>"; };
+		D2E3F4A5B6C7000000000201 /* ThirdPartyLicenses */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Resources/ThirdPartyLicenses; sourceTree = "<group>"; };
+		B0B0C0D0E0F0000000000230 /* KeyboardControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardControllerTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A1B2C3D4E5F6000000000401 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1B2C3D4E5F6000000000118 /* WhisperKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1B2C3D4E5F6000000000402 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B0B0C0D0E0F0000000000401 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C1D2E3F4A5B6000000000401 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A1B2C3D4E5F6000000000002 = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D4E5F6000000000004 /* Vyrra */,
+				A1B2C3D4E5F6000000000008 /* VyrraTests */,
+				B0B0C0D0E0F0000000000002 /* VyrraKeyboard */,
+				C1D2E3F4A5B6000000000001 /* VyrraLiveActivity */,
+				A1B2C3D4E5F6000000000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A1B2C3D4E5F6000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D4E5F6000000000301 /* Vyrra.app */,
+				A1B2C3D4E5F6000000000302 /* VyrraTests.xctest */,
+				B0B0C0D0E0F0000000000207 /* VyrraKeyboard.appex */,
+				C1D2E3F4A5B6000000000206 /* VyrraLiveActivity.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A1B2C3D4E5F6000000000004 /* Vyrra */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D4E5F6000000000201 /* VyrraApp.swift */,
+				A1B2C3D4E5F6000000000202 /* ContentView.swift */,
+				A1B2C3D4E5F6000000000230 /* AppShortcuts.swift */,
+				A1B2C3D4E5F6000000000005 /* Models */,
+				A1B2C3D4E5F6000000000006 /* Services */,
+				B0B0C0D0E0F0000000000001 /* Shared */,
+				A1B2C3D4E5F6000000000007 /* Views */,
+				A1B2C3D4E5F6000000000216 /* Assets.xcassets */,
+				AF14D8C90727000000000203 /* DictationSounds */,
+				A1B2C3D4E5F6000000000218 /* Info.plist */,
+				A1B2C3D4E5F6000000000219 /* PrivacyInfo.xcprivacy */,
+				D2E3F4A5B6C7000000000201 /* ThirdPartyLicenses */,
+				B0B0C0D0E0F0000000000202 /* Vyrra.entitlements */,
+			);
+			path = Vyrra;
+			sourceTree = "<group>";
+		};
+		B0B0C0D0E0F0000000000001 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				B0B0C0D0E0F0000000000201 /* KeyboardSharedStore.swift */,
+				B0B0C0D0E0F000000000020C /* KeyboardGeometry.swift */,
+				B0B0C0D0E0F0000000000220 /* KeyboardInputPolicy.swift */,
+				C1D2E3F4A5B6000000000201 /* VyrraActivityAttributes.swift */,
+				E1F2A3B4C5D6000000000201 /* VyrraSessionPolicy.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		A1B2C3D4E5F6000000000005 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D4E5F6000000000203 /* TranscriptionRecord.swift */,
+				A1B2C3D4E5F6000000000224 /* PersonalizationModels.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		A1B2C3D4E5F6000000000006 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D4E5F6000000000204 /* AudioRecorder.swift */,
+				A1B2C3D4E5F6000000000205 /* TranscriptionEngine.swift */,
+				A1B2C3D4E5F6000000000232 /* DictationSessionController.swift */,
+				F2E3D4C5B6A7000000000201 /* PendingRecordingStore.swift */,
+				A1B2C3D4E5F6000000000206 /* ModelManager.swift */,
+				A1B2C3D4E5F6000000000231 /* ModelCacheStore.swift */,
+				A1B2C3D4E5F6000000000207 /* TextPolisher.swift */,
+				A1B2C3D4E5F6000000000208 /* ClipboardService.swift */,
+				A1B2C3D4E5F6000000000209 /* HapticManager.swift */,
+				AF14D8C90727000000000202 /* DictationSound.swift */,
+				A1B2C3D4E5F6000000000251 /* DictationAnnouncer.swift */,
+				A1B2C3D4E5F6000000000229 /* AppNavigationRequest.swift */,
+				A1B2C3D4E5F6000000000221 /* VisualFixture.swift */,
+				A1B2C3D4E5F6000000000223 /* RecordingDiagnostics.swift */,
+				C1D2E3F4A5B6000000000202 /* VyrraLiveActivityController.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		A1B2C3D4E5F6000000000007 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D4E5F6000000000210 /* RecordView.swift */,
+				A1B2C3D4E5F6000000000211 /* RecordButton.swift */,
+				A1B2C3D4E5F6000000000212 /* WaveformView.swift */,
+				A1B2C3D4E5F6000000000213 /* HistoryView.swift */,
+				A1B2C3D4E5F6000000000225 /* DictionaryView.swift */,
+				A1B2C3D4E5F6000000000226 /* SnippetsView.swift */,
+				A1B2C3D4E5F6000000000227 /* StyleView.swift */,
+				A1B2C3D4E5F6000000000228 /* ProfileView.swift */,
+				A1B2C3D4E5F6000000000214 /* SettingsView.swift */,
+				A1B2C3D4E5F6000000000215 /* ToastView.swift */,
+				A1B2C3D4E5F6000000000220 /* VyrraDesign.swift */,
+				A1B2C3D4E5F6000000000222 /* ReadinessView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A1B2C3D4E5F6000000000008 /* VyrraTests */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D4E5F6000000000217 /* TextPolisherTests.swift */,
+				A1B2C3D4E5F6000000000233 /* DictationSessionControllerTests.swift */,
+				A1B2C3D4E5F6000000000250 /* VyrraColorContrastTests.swift */,
+				F2E3D4C5B6A7000000000202 /* PendingRecordingStoreTests.swift */,
+				A1B2C3D4E5F6000000000234 /* ModelCacheStoreTests.swift */,
+				A1B2C3D4E5F6000000000235 /* ModelManagerTests.swift */,
+				A1B2C3D4E5F6000000000236 /* AppNavigationRequestTests.swift */,
+				B0B0C0D0E0F0000000000208 /* KeyboardSharedStoreTests.swift */,
+				B0B0C0D0E0F000000000020D /* KeyboardGeometryTests.swift */,
+				B0B0C0D0E0F0000000000221 /* KeyboardInputPolicyTests.swift */,
+				B0B0C0D0E0F0000000000230 /* KeyboardControllerTests.swift */,
+			);
+			path = VyrraTests;
+			sourceTree = "<group>";
+		};
+		B0B0C0D0E0F0000000000002 /* VyrraKeyboard */ = {
+			isa = PBXGroup;
+			children = (
+				B0B0C0D0E0F000000000020E /* Assets.xcassets */,
+				B0B0C0D0E0F0000000000209 /* KeyboardLayout.swift */,
+				B0B0C0D0E0F000000000020A /* KeyboardPalette.swift */,
+				AF14D8C90727000000000201 /* KeyboardDictationPanel.swift */,
+				B0B0C0D0E0F000000000020B /* KeyboardWaveformView.swift */,
+				B0B0C0D0E0F0000000000204 /* KeyboardViewController.swift */,
+				B0B0C0D0E0F0000000000205 /* Info.plist */,
+				B0B0C0D0E0F0000000000206 /* VyrraKeyboard.entitlements */,
+			);
+			path = VyrraKeyboard;
+			sourceTree = "<group>";
+		};
+		C1D2E3F4A5B6000000000001 /* VyrraLiveActivity */ = {
+			isa = PBXGroup;
+			children = (
+				C1D2E3F4A5B6000000000203 /* VyrraLiveActivityBundle.swift */,
+				C1D2E3F4A5B6000000000204 /* VyrraLiveActivityWidget.swift */,
+				C1D2E3F4A5B6000000000205 /* Info.plist */,
+			);
+			path = VyrraLiveActivity;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A1B2C3D4E5F6000000000501 /* Vyrra */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A1B2C3D4E5F6000000000701 /* Build configuration list for PBXNativeTarget "Vyrra" */;
+			buildPhases = (
+				A1B2C3D4E5F6000000000601 /* Sources */,
+				A1B2C3D4E5F6000000000401 /* Frameworks */,
+				A1B2C3D4E5F6000000000602 /* Resources */,
+				B0B0C0D0E0F0000000000603 /* Embed App Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B0B0C0D0E0F0000000000902 /* PBXTargetDependency */,
+				C1D2E3F4A5B6000000000902 /* PBXTargetDependency */,
+			);
+			name = Vyrra;
+			packageProductDependencies = (
+				A1B2C3D4E5F6000000000802 /* WhisperKit */,
+			);
+			productName = Vyrra;
+			productReference = A1B2C3D4E5F6000000000301 /* Vyrra.app */;
+			productType = "com.apple.product-type.application";
+		};
+		A1B2C3D4E5F6000000000502 /* VyrraTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A1B2C3D4E5F6000000000702 /* Build configuration list for PBXNativeTarget "VyrraTests" */;
+			buildPhases = (
+				A1B2C3D4E5F6000000000603 /* Sources */,
+				A1B2C3D4E5F6000000000402 /* Frameworks */,
+				A1B2C3D4E5F6000000000604 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A1B2C3D4E5F6000000000902 /* PBXTargetDependency */,
+			);
+			name = VyrraTests;
+			productName = VyrraTests;
+			productReference = A1B2C3D4E5F6000000000302 /* VyrraTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		B0B0C0D0E0F0000000000501 /* Vyrra Keyboard */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B0B0C0D0E0F0000000000701 /* Build configuration list for PBXNativeTarget "Vyrra Keyboard" */;
+			buildPhases = (
+				B0B0C0D0E0F0000000000601 /* Sources */,
+				B0B0C0D0E0F0000000000401 /* Frameworks */,
+				B0B0C0D0E0F0000000000602 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Vyrra Keyboard";
+			productName = VyrraKeyboard;
+			productReference = B0B0C0D0E0F0000000000207 /* VyrraKeyboard.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		C1D2E3F4A5B6000000000501 /* Vyrra Live Activity */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C1D2E3F4A5B6000000000701 /* Build configuration list for PBXNativeTarget "Vyrra Live Activity" */;
+			buildPhases = (
+				C1D2E3F4A5B6000000000601 /* Sources */,
+				C1D2E3F4A5B6000000000401 /* Frameworks */,
+				C1D2E3F4A5B6000000000602 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Vyrra Live Activity";
+			productName = VyrraLiveActivity;
+			productReference = C1D2E3F4A5B6000000000206 /* VyrraLiveActivity.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A1B2C3D4E5F6000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2600;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					A1B2C3D4E5F6000000000501 = {
+						CreatedOnToolsVersion = 26.0;
+					};
+					A1B2C3D4E5F6000000000502 = {
+						CreatedOnToolsVersion = 26.0;
+						TestTargetID = A1B2C3D4E5F6000000000501;
+					};
+					B0B0C0D0E0F0000000000501 = {
+						CreatedOnToolsVersion = 26.0;
+					};
+					C1D2E3F4A5B6000000000501 = {
+						CreatedOnToolsVersion = 26.0;
+					};
+				};
+			};
+			buildConfigurationList = A1B2C3D4E5F6000000000700 /* Build configuration list for PBXProject "Vyrra" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A1B2C3D4E5F6000000000002;
+			packageReferences = (
+				A1B2C3D4E5F6000000000801 /* XCRemoteSwiftPackageReference "argmax-oss-swift" */,
+			);
+			productRefGroup = A1B2C3D4E5F6000000000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A1B2C3D4E5F6000000000501 /* Vyrra */,
+				A1B2C3D4E5F6000000000502 /* VyrraTests */,
+				B0B0C0D0E0F0000000000501 /* Vyrra Keyboard */,
+				C1D2E3F4A5B6000000000501 /* Vyrra Live Activity */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A1B2C3D4E5F6000000000602 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1B2C3D4E5F6000000000116 /* Assets.xcassets in Resources */,
+				AF14D8C90727000000000104 /* DictationSounds in Resources */,
+				A1B2C3D4E5F6000000000119 /* PrivacyInfo.xcprivacy in Resources */,
+				D2E3F4A5B6C7000000000101 /* ThirdPartyLicenses in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1B2C3D4E5F6000000000604 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B0B0C0D0E0F0000000000602 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B0B0C0D0E0F000000000010C /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C1D2E3F4A5B6000000000602 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A1B2C3D4E5F6000000000601 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1B2C3D4E5F6000000000101 /* VyrraApp.swift in Sources */,
+				A1B2C3D4E5F6000000000102 /* ContentView.swift in Sources */,
+				A1B2C3D4E5F6000000000103 /* TranscriptionRecord.swift in Sources */,
+				A1B2C3D4E5F6000000000104 /* AudioRecorder.swift in Sources */,
+				A1B2C3D4E5F6000000000105 /* TranscriptionEngine.swift in Sources */,
+				A1B2C3D4E5F6000000000106 /* ModelManager.swift in Sources */,
+				A1B2C3D4E5F6000000000107 /* TextPolisher.swift in Sources */,
+				A1B2C3D4E5F6000000000108 /* ClipboardService.swift in Sources */,
+				A1B2C3D4E5F6000000000109 /* HapticManager.swift in Sources */,
+				AF14D8C90727000000000103 /* DictationSound.swift in Sources */,
+				A1B2C3D4E5F6000000000151 /* DictationAnnouncer.swift in Sources */,
+				A1B2C3D4E5F6000000000110 /* RecordView.swift in Sources */,
+				A1B2C3D4E5F6000000000111 /* RecordButton.swift in Sources */,
+				A1B2C3D4E5F6000000000112 /* WaveformView.swift in Sources */,
+				A1B2C3D4E5F6000000000113 /* HistoryView.swift in Sources */,
+				A1B2C3D4E5F6000000000114 /* SettingsView.swift in Sources */,
+				A1B2C3D4E5F6000000000115 /* ToastView.swift in Sources */,
+				A1B2C3D4E5F6000000000120 /* VyrraDesign.swift in Sources */,
+				A1B2C3D4E5F6000000000121 /* VisualFixture.swift in Sources */,
+				A1B2C3D4E5F6000000000122 /* ReadinessView.swift in Sources */,
+				A1B2C3D4E5F6000000000123 /* RecordingDiagnostics.swift in Sources */,
+				A1B2C3D4E5F6000000000124 /* PersonalizationModels.swift in Sources */,
+				A1B2C3D4E5F6000000000125 /* DictionaryView.swift in Sources */,
+				A1B2C3D4E5F6000000000126 /* SnippetsView.swift in Sources */,
+				A1B2C3D4E5F6000000000127 /* StyleView.swift in Sources */,
+				A1B2C3D4E5F6000000000128 /* ProfileView.swift in Sources */,
+				A1B2C3D4E5F6000000000129 /* AppNavigationRequest.swift in Sources */,
+				A1B2C3D4E5F6000000000130 /* AppShortcuts.swift in Sources */,
+				A1B2C3D4E5F6000000000131 /* ModelCacheStore.swift in Sources */,
+				A1B2C3D4E5F6000000000132 /* DictationSessionController.swift in Sources */,
+				F2E3D4C5B6A7000000000101 /* PendingRecordingStore.swift in Sources */,
+				B0B0C0D0E0F0000000000101 /* KeyboardSharedStore.swift in Sources */,
+				B0B0C0D0E0F0000000000109 /* KeyboardGeometry.swift in Sources */,
+				B0B0C0D0E0F0000000000120 /* KeyboardInputPolicy.swift in Sources */,
+				C1D2E3F4A5B6000000000101 /* VyrraActivityAttributes.swift in Sources */,
+				C1D2E3F4A5B6000000000102 /* VyrraLiveActivityController.swift in Sources */,
+				E1F2A3B4C5D6000000000101 /* VyrraSessionPolicy.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1B2C3D4E5F6000000000603 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1B2C3D4E5F6000000000117 /* TextPolisherTests.swift in Sources */,
+				A1B2C3D4E5F6000000000133 /* DictationSessionControllerTests.swift in Sources */,
+				A1B2C3D4E5F6000000000150 /* VyrraColorContrastTests.swift in Sources */,
+				F2E3D4C5B6A7000000000102 /* PendingRecordingStoreTests.swift in Sources */,
+				A1B2C3D4E5F6000000000134 /* ModelCacheStoreTests.swift in Sources */,
+				A1B2C3D4E5F6000000000135 /* ModelManagerTests.swift in Sources */,
+				A1B2C3D4E5F6000000000136 /* AppNavigationRequestTests.swift in Sources */,
+				B0B0C0D0E0F0000000000105 /* KeyboardSharedStoreTests.swift in Sources */,
+				B0B0C0D0E0F000000000010B /* KeyboardGeometryTests.swift in Sources */,
+				B0B0C0D0E0F0000000000122 /* KeyboardInputPolicyTests.swift in Sources */,
+				B0B0C0D0E0F0000000000134 /* KeyboardControllerTests.swift in Sources */,
+				B0B0C0D0E0F0000000000133 /* KeyboardWaveformView.swift in Sources */,
+				AF14D8C90727000000000102 /* KeyboardDictationPanel.swift in Sources */,
+				B0B0C0D0E0F0000000000132 /* KeyboardPalette.swift in Sources */,
+				B0B0C0D0E0F0000000000131 /* KeyboardLayout.swift in Sources */,
+				B0B0C0D0E0F0000000000130 /* KeyboardViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B0B0C0D0E0F0000000000601 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B0B0C0D0E0F0000000000106 /* KeyboardLayout.swift in Sources */,
+				B0B0C0D0E0F0000000000107 /* KeyboardPalette.swift in Sources */,
+				B0B0C0D0E0F0000000000108 /* KeyboardWaveformView.swift in Sources */,
+				AF14D8C90727000000000101 /* KeyboardDictationPanel.swift in Sources */,
+				B0B0C0D0E0F000000000010A /* KeyboardGeometry.swift in Sources */,
+				B0B0C0D0E0F0000000000121 /* KeyboardInputPolicy.swift in Sources */,
+				B0B0C0D0E0F0000000000103 /* KeyboardViewController.swift in Sources */,
+				B0B0C0D0E0F0000000000102 /* KeyboardSharedStore.swift in Sources */,
+				E1F2A3B4C5D6000000000102 /* VyrraSessionPolicy.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C1D2E3F4A5B6000000000601 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C1D2E3F4A5B6000000000103 /* VyrraActivityAttributes.swift in Sources */,
+				C1D2E3F4A5B6000000000104 /* VyrraLiveActivityBundle.swift in Sources */,
+				C1D2E3F4A5B6000000000105 /* VyrraLiveActivityWidget.swift in Sources */,
+				E1F2A3B4C5D6000000000103 /* VyrraSessionPolicy.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A1B2C3D4E5F6000000000902 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A1B2C3D4E5F6000000000501 /* Vyrra */;
+			targetProxy = A1B2C3D4E5F6000000000901 /* PBXContainerItemProxy */;
+		};
+		B0B0C0D0E0F0000000000902 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B0B0C0D0E0F0000000000501 /* Vyrra Keyboard */;
+			targetProxy = B0B0C0D0E0F0000000000901 /* PBXContainerItemProxy */;
+		};
+		C1D2E3F4A5B6000000000902 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C1D2E3F4A5B6000000000501 /* Vyrra Live Activity */;
+			targetProxy = C1D2E3F4A5B6000000000901 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		A1B2C3D4E5F6000000001001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		A1B2C3D4E5F6000000001002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		A1B2C3D4E5F6000000001003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Vyrra/Vyrra.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 30;
+				DEVELOPMENT_ASSET_PATHS = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Vyrra/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.runnerconcepts.vyrra;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		A1B2C3D4E5F6000000001004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Vyrra/Vyrra.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 30;
+				DEVELOPMENT_ASSET_PATHS = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Vyrra/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.runnerconcepts.vyrra;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		A1B2C3D4E5F6000000001005 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 30;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.runnerconcepts.vyrra.tests;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) KEYBOARD_TESTING";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Vyrra.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Vyrra";
+			};
+			name = Debug;
+		};
+		A1B2C3D4E5F6000000001006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 30;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.runnerconcepts.vyrra.tests;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) KEYBOARD_TESTING";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Vyrra.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Vyrra";
+			};
+			name = Release;
+		};
+		B0B0C0D0E0F0000000001001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = VyrraKeyboard/VyrraKeyboard.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 30;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = VyrraKeyboard/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.runnerconcepts.vyrra.keyboard;
+				PRODUCT_MODULE_NAME = VyrraKeyboard;
+				PRODUCT_NAME = VyrraKeyboard;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		B0B0C0D0E0F0000000001002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = VyrraKeyboard/VyrraKeyboard.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 30;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = VyrraKeyboard/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.runnerconcepts.vyrra.keyboard;
+				PRODUCT_MODULE_NAME = VyrraKeyboard;
+				PRODUCT_NAME = VyrraKeyboard;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		C1D2E3F4A5B6000000001001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 30;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = VyrraLiveActivity/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.runnerconcepts.vyrra.liveactivity;
+				PRODUCT_MODULE_NAME = VyrraLiveActivity;
+				PRODUCT_NAME = VyrraLiveActivity;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		C1D2E3F4A5B6000000001002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 30;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = VyrraLiveActivity/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.runnerconcepts.vyrra.liveactivity;
+				PRODUCT_MODULE_NAME = VyrraLiveActivity;
+				PRODUCT_NAME = VyrraLiveActivity;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A1B2C3D4E5F6000000000700 /* Build configuration list for PBXProject "Vyrra" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1B2C3D4E5F6000000001001 /* Debug */,
+				A1B2C3D4E5F6000000001002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A1B2C3D4E5F6000000000701 /* Build configuration list for PBXNativeTarget "Vyrra" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1B2C3D4E5F6000000001003 /* Debug */,
+				A1B2C3D4E5F6000000001004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A1B2C3D4E5F6000000000702 /* Build configuration list for PBXNativeTarget "VyrraTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1B2C3D4E5F6000000001005 /* Debug */,
+				A1B2C3D4E5F6000000001006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B0B0C0D0E0F0000000000701 /* Build configuration list for PBXNativeTarget "Vyrra Keyboard" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B0B0C0D0E0F0000000001001 /* Debug */,
+				B0B0C0D0E0F0000000001002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C1D2E3F4A5B6000000000701 /* Build configuration list for PBXNativeTarget "Vyrra Live Activity" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C1D2E3F4A5B6000000001001 /* Debug */,
+				C1D2E3F4A5B6000000001002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A1B2C3D4E5F6000000000801 /* XCRemoteSwiftPackageReference "argmax-oss-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/argmaxinc/argmax-oss-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.18.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A1B2C3D4E5F6000000000802 /* WhisperKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1B2C3D4E5F6000000000801 /* XCRemoteSwiftPackageReference "argmax-oss-swift" */;
+			productName = WhisperKit;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = A1B2C3D4E5F6000000000001 /* Project object */;
+}

@@ -1,0 +1,41 @@
+Vyrra 1.0 Third-Party Dependency Inventory
+
+argmax-oss-swift / WhisperKit 0.18.0
+Source: https://github.com/argmaxinc/argmax-oss-swift
+License: MIT
+
+swift-transformers 1.1.9
+Source: https://github.com/huggingface/swift-transformers
+License: Apache License 2.0
+
+swift-jinja 2.3.5
+Source: https://github.com/huggingface/swift-jinja
+License: Apache License 2.0
+
+yyjson 0.12.0
+Source: https://github.com/ibireme/yyjson
+License: MIT
+
+swift-collections 1.4.1
+Source: https://github.com/apple/swift-collections
+License: Apache License 2.0
+
+swift-crypto 4.5.0
+Source: https://github.com/apple/swift-crypto
+License: Apache License 2.0 with NOTICE
+
+swift-asn1 1.7.0
+Source: https://github.com/apple/swift-asn1
+License: Apache License 2.0 with NOTICE
+
+swift-argument-parser 1.7.1
+Source: https://github.com/apple/swift-argument-parser
+License: Apache License 2.0
+
+OpenAI Whisper large-v3
+Source: https://huggingface.co/openai/whisper-large-v3
+License identified by the publisher: Apache License 2.0
+
+WhisperKit Core ML model conversion
+Source: https://huggingface.co/argmaxinc/whisperkit-coreml
+The downloaded Core ML artifacts are derived from the OpenAI Whisper model family and are provided by Argmax for use with WhisperKit.
