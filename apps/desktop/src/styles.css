@@ -243,7 +243,7 @@
 .model-controls { display: flex; align-items: center; flex: none; }
 .model-primary, .model-secondary { display: inline-flex; }
 .model-primary .vyrra-icon { color: var(--pvw-ink); }
-.model-primary .model-check:disabled, .model-primary .vyrra-busy:disabled { opacity: 1; cursor: default; }
+.model-primary [aria-disabled=true].model-check, .model-primary [aria-disabled=true].vyrra-busy { opacity: 1; cursor: default; }
 .vyrra-busy svg { animation: vyrra-spin var(--vyrra-spin) linear infinite; }
 @keyframes vyrra-spin { to { transform: rotate(1turn); } }
 .model-sources { margin-top: 20px; border-top: 1px solid var(--pvw-line); padding-block: 8px; }

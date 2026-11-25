@@ -208,10 +208,12 @@ function ModelRow({
                 }
                 className={job ? "vyrra-busy" : settled ? "model-check" : ""}
                 aria-busy={Boolean(job)}
-                disabled={disabled || Boolean(job) || settled}
-                onClick={() =>
-                  void onAction(model.id, installed ? "use" : "download")
-                }
+                aria-disabled={disabled || Boolean(job) || settled}
+                disabled={disabled && !job && !settled}
+                onClick={() => {
+                  if (!disabled && !job && !settled)
+                    void onAction(model.id, installed ? "use" : "download");
+                }}
               />
             </span>
           </>
@@ -241,6 +243,7 @@ export function ModelsPage() {
   const [loadError, setLoadError] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [announcement, setAnnouncement] = useState("");
   const [pending, setPending] = useState<{ id: string; action: Action } | null>(
     null,
   );
@@ -261,6 +264,7 @@ export function ModelsPage() {
         setDevice({ speech, writing });
         setLoadError("");
       }
+      return { speech, writing };
     } catch (e) {
       if (mounted.current && request === sequence.current)
         setLoadError(message(e));
@@ -313,10 +317,23 @@ export function ModelsPage() {
   async function act(id: string, action: Action) {
     setError("");
     setNotice("");
+    setAnnouncement("");
     if (action !== "cancel") setPending({ id, action });
     try {
       await modelAction(id, action);
       if (action === "remove") setNotice("Model removed.");
+      if (["use", "download", "import"].includes(action)) {
+        const installed = await refresh();
+        if (id === writer.id && installed?.writing.installed)
+          setAnnouncement("Writing model downloaded.");
+        else if (id === installed?.speech.active) {
+          const model = speechModels.find((m) => m.id === id);
+          if (model)
+            setAnnouncement(
+              `Whisper ${model.name}, ${model.languages === 1 ? "English only" : "Multilingual"}, is in use.`,
+            );
+        }
+      }
     } catch (e) {
       if (message(e) === "Model setup canceled.") setNotice(message(e));
       else setError(message(e));
@@ -396,7 +413,7 @@ export function ModelsPage() {
         </p>
       )}
       <div role="status" className={notice ? "model-note" : "sr-only"}>
-        {notice}
+        {notice || announcement}
       </div>
       {visibleGroups.map(({ label, icon: Icon, models: visible }) => {
         return (

@@ -379,6 +379,38 @@ mod tests {
         assert!(prompt(Task::Ask, "When?", "").is_err());
     }
     #[test]
+    #[ignore = "requires VYRRA_TEST_WRITING_DIR with both verified Qwen files"]
+    fn rewrite_draft_and_meeting_notes_run_locally() {
+        let writer = Writing::new(std::env::var("VYRRA_TEST_WRITING_DIR").unwrap().into());
+        let cases = [
+            (
+                Task::Rewrite,
+                "Make this sentence shorter. Keep the weekday.",
+                "I wanted to let you know that the meeting is on Friday.",
+                "friday",
+            ),
+            (
+                Task::Draft,
+                "Write a one-sentence invitation to a picnic on Friday.",
+                "",
+                "friday",
+            ),
+            (
+                Task::MeetingNotes,
+                "",
+                "Maya will bring the blue notebook to the Friday meeting.",
+                "notebook",
+            ),
+        ];
+        for (task, instruction, source, keyword) in cases {
+            let answer = writer
+                .write(&prompt(task, instruction, source).unwrap(), 120)
+                .unwrap();
+            println!("Writing fixture: {answer}");
+            assert!(answer.to_lowercase().contains(keyword));
+        }
+    }
+    #[test]
     #[ignore = "requires VYRRA_TEST_WRITING_DIR pointing to the verified Qwen model and tokenizer"]
     fn answers_from_supplied_transcript_locally() {
         let writer = Writing::new(std::env::var("VYRRA_TEST_WRITING_DIR").unwrap().into());

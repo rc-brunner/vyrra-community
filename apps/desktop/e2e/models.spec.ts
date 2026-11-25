@@ -103,6 +103,7 @@ test("download, cancel, retry, switch and remove keep the control in place", asy
     "vyrra-spin",
   );
   await expect(row).toContainText("30%");
+  await expect(primary).toBeFocused();
   expect(await primary.boundingBox()).toEqual(before);
   await row.getByRole("button", { name: /Cancel setup/ }).click();
   await expect(row.getByRole("button", { name: /^Download / })).toBeEnabled();
@@ -175,6 +176,11 @@ for (const scheme of ["light", "dark"] as const) {
       "min-height",
       "52px",
     );
+    if (process.env.VYRRA_DESKTOP_REVIEW_ARTIFACTS) {
+      await page.screenshot({
+        path: `${process.env.VYRRA_DESKTOP_REVIEW_ARTIFACTS}/models-${scheme}.png`,
+      });
+    }
     await expect(page.locator(".model-name").first()).toHaveCSS(
       "font-size",
       "13px",
