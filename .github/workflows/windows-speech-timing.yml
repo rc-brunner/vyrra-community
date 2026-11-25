@@ -18,7 +18,7 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update -qq
-          sudo apt-get install -yqq espeak-ng qemu-user
+          sudo apt-get install -yqq espeak-ng ffmpeg qemu-user
           curl -fsSL --retry 3 https://static.crates.io/crates/whisper-rs-sys/whisper-rs-sys-0.15.0.crate -o source.tar.gz
           digest=$(python3 -c "import tomllib;print(next(x['checksum'] for x in tomllib.load(open('apps/desktop/src-tauri/Cargo.lock','rb'))['package'] if x['name']=='whisper-rs-sys'))")
           echo "$digest  source.tar.gz" | sha256sum -c -
