@@ -8,18 +8,12 @@ import { AutomationsPage } from "./AutomationsPage";
 import { TodayPage } from "./TodayPage";
 
 describe("truthful prototype capability boundaries", () => {
-  it("fails model capabilities closed until verification exists", () => {
+  it("shows the real catalog and keeps device operations inside the native app", () => {
     render(<ModelsPage />);
-
-    expect(screen.getByText("Catalog not connected")).toBeInTheDocument();
-    expect(screen.getAllByText("Unavailable").length).toBeGreaterThan(0);
-    expect(screen.getByRole("button", { name: "Install" })).toBeDisabled();
-    expect(
-      screen.getByText(/There is no automatic cloud fallback/i),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/does not display a decorative provider catalog/i),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Models" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Download Whisper Small, Multilingual" })).toBeDisabled();
+    expect(screen.getByRole("link", {name: "Whisper weights"})).toHaveAttribute("href", expect.stringContaining("huggingface.co/ggerganov/whisper.cpp"));
+    expect(screen.getByText("Open Vyrra Desktop to install models on this device.")).toBeInTheDocument();
   });
 
   it("renders a genuine empty meeting history instead of fake data", () => {

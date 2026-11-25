@@ -21,13 +21,26 @@ pub struct Entry {
     pub archived: bool,
 }
 
-#[derive(Default, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
 pub struct Library {
     pub options: SpeechOptions,
     pub entries: Vec<Entry>,
     pub shortcuts: bool,
+    pub speech_model: String,
     next_id: u64,
+}
+
+impl Default for Library {
+    fn default() -> Self {
+        Self {
+            options: Default::default(),
+            entries: Vec::new(),
+            shortcuts: false,
+            speech_model: super::catalog::DEFAULT_ID.into(),
+            next_id: 0,
+        }
+    }
 }
 
 fn read(dir: &Path) -> Result<Library> {

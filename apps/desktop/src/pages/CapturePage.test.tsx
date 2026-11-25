@@ -39,6 +39,20 @@ describe("desktop dictation", () => {
     fireEvent.click(screen.getByRole("button", { name: "Cancel dictation" }));
     await waitFor(() => expect(service.dictate).toHaveBeenCalledWith("cancel"));
   });
+  it("runs the advertised shortcut once and leaves editing and IME input alone", () => {
+    vi.mocked(service.useDictation).mockReturnValue({ ...snapshot, text: "Keep my draft" });
+    render(<CapturePage />);
+    const btn = screen.getByRole("button", {name:"Start dictation"});
+    const modifier = btn.getAttribute("aria-keyshortcuts") === "Meta+Enter" ? {metaKey:true} : {ctrlKey:true};
+    expect(btn.querySelector("kbd")).toBeInTheDocument();
+    fireEvent.keyDown(window, {key:"Enter", ...modifier, repeat:true});
+    fireEvent.keyDown(window, {key:"Enter", ...modifier, isComposing:true});
+    fireEvent.keyDown(screen.getByRole("textbox", {name:"Transcript"}), {key:"Enter", ...modifier});
+    expect(service.dictate).not.toHaveBeenCalled();
+    fireEvent.keyDown(window, {key:"Enter", ...modifier});
+    expect(service.dictate).toHaveBeenCalledTimes(1);
+    expect(service.dictate).toHaveBeenCalledWith("start");
+  });
   it("keeps web previews and missing models from opening a microphone", () => {
     vi.mocked(native.isNativeDesktop).mockReturnValue(false);
     const view = render(<CapturePage />);

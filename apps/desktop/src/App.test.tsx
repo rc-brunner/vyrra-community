@@ -50,11 +50,11 @@ describe("release navigation", () => {
     ).toHaveAttribute("aria-current", "page");
   });
 
-  it("keeps the primary navigation to four primary destinations", () => {
+  it("makes the model catalog reachable from primary navigation", () => {
     render(<App />);
 
     const primary = screen.getByRole("navigation", { name: "Primary" });
-    expect(primary.querySelectorAll("a")).toHaveLength(4);
+    expect(primary.querySelector('a[href="#/models"]')).toHaveTextContent("Models");
     expect(screen.getAllByRole("link", { name: "Dictate" })[0])
       .toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: "Library" })[0])

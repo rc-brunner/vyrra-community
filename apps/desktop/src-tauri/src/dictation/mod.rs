@@ -1,4 +1,5 @@
 pub(crate) mod audio;
+pub(crate) mod catalog;
 mod engine;
 pub mod feedback;
 pub mod hotkeys;
@@ -16,7 +17,8 @@ use tauri::{AppHandle, Manager, State};
 use whisper_rs::WhisperContext;
 
 use audio::Microphone;
-use engine::{MODEL_FILE, Result, SpeechOptions};
+use catalog::{MeetingDecoder, SpeechModel};
+use engine::{Result, SpeechOptions};
 
 #[derive(Default, Clone, Copy, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -43,6 +45,7 @@ enum Model {
 #[serde(rename_all = "camelCase")]
 pub struct Snapshot {
     phase: Phase,
+    active_model: Option<&'static str>,
     model: Model,
     elapsed_ms: u64,
     level: f32,
@@ -58,6 +61,8 @@ struct Session {
     model: Model,
     token: u64,
     engine: Option<Arc<WhisperContext>>,
+    active: Option<&'static SpeechModel>,
+    model_job: Option<catalog::Job>,
     mic: Option<Microphone>,
     options: SpeechOptions,
     external: bool,
@@ -87,64 +92,40 @@ impl Dictation {
     fn lock(&self) -> MutexGuard<'_, Session> {
         self.inner.lock().unwrap_or_else(|e| e.into_inner())
     }
-    fn model_path(&self) -> PathBuf {
-        self.dir.join("models").join(MODEL_FILE)
-    }
-
-    pub fn prepare_existing(&self) {
-        let path = self.model_path();
-        if path.is_file() {
-            let _ = self.prepare(Model::Checking, || engine::load_model(&path));
-        }
-    }
-
-    fn prepare(&self, mode: Model, load: impl FnOnce() -> Result<WhisperContext>) -> Result<()> {
-        {
-            let mut session = self.lock();
-            match session.model {
-                Model::Ready => return Ok(()),
-                Model::Checking | Model::Installing => {
-                    return Err("Model setup is already running.");
-                }
-                Model::Missing => {}
-            }
-            session.model = mode;
-            session.error = None;
-        }
-        let result = load();
-        let mut session = self.lock();
-        match result {
-            Ok(engine) => {
-                session.engine = Some(Arc::new(engine));
-                session.model = Model::Ready;
-                Ok(())
-            }
-            Err(msg) => {
-                session.model = Model::Missing;
-                session.error = Some(msg.into());
-                Err(msg)
-            }
-        }
-    }
-
     pub(crate) fn meeting_ready(&self) -> bool {
         self.lock().engine.is_some()
     }
-    pub(crate) fn meeting_text(&self, pcm: &[f32]) -> Result<String> {
-        let _worker = self.decoder.lock().unwrap_or_else(|e| e.into_inner());
-        let model = self
-            .lock()
+    pub(crate) fn meeting_decoder(&self) -> Result<MeetingDecoder> {
+        let s = self.lock();
+        let engine = s
             .engine
             .clone()
-            .ok_or("Install the speech model first.")?;
-        let mut options = library::load(&self.dir)?.options;
+            .ok_or("Install the local speech model before the meeting starts.")?;
+        let mut options = self.options_for(&s)?;
         options.snippets.clear();
-        engine::transcribe(&model, pcm, &options)
+        Ok(MeetingDecoder {
+            engine,
+            options,
+            worker: self.decoder.clone(),
+        })
+    }
+    fn options_for(&self, session: &Session) -> Result<SpeechOptions> {
+        let mut options = library::load(&self.dir)?.options;
+        if let Some(model) = session.active {
+            model.check_options(&options)?;
+            if model.languages == 1 {
+                options.language = Some("en".into());
+            }
+        }
+        Ok(options)
     }
     fn begin(&self) -> Result<u64> {
         let mut session = self.lock();
         if session.phase != Phase::Idle {
             return Err("A dictation is already in progress.");
+        }
+        if session.model_job.is_some() {
+            return Err("Wait for model setup to finish.");
         }
         if session.engine.is_none() {
             return Err("Install the speech model on this device first.");
@@ -152,7 +133,7 @@ impl Dictation {
         session.external = false;
         session.target = None;
         session.delivery = None;
-        session.options = library::load(&self.dir)?.options;
+        session.options = self.options_for(&session)?;
         session.token = session.token.wrapping_add(1);
         session.error = None;
         session.elapsed_ms = 0;
@@ -220,6 +201,7 @@ impl Dictation {
         }
         Snapshot {
             phase: s.phase,
+            active_model: s.active.map(|m| m.id),
             model: s.model,
             elapsed_ms,
             level: if s.phase == Phase::Listening {
@@ -369,12 +351,20 @@ async fn blocking<T: Send + 'static>(f: impl FnOnce() -> Result<T> + Send + 'sta
 }
 
 #[tauri::command]
-pub async fn dictation_install(state: State<'_, Dictation>, offline: bool) -> Result<()> {
+pub async fn dictation_install(
+    state: State<'_, Dictation>,
+    offline: bool,
+    id: Option<String>,
+) -> Result<()> {
+    let model = catalog::find(id.as_deref().unwrap_or(catalog::DEFAULT_ID))?;
     let state = state.inner().clone();
     let import = if offline {
         let Some(file) = rfd::AsyncFileDialog::new()
-            .set_title("Choose the Whisper base model")
-            .add_filter("Whisper base", &["bin"])
+            .set_title(format!(
+                "Choose Whisper {} (ggml-{}.bin)",
+                model.name, model.id
+            ))
+            .add_filter("Whisper speech model", &["bin"])
             .pick_file()
             .await
         else {
@@ -384,12 +374,7 @@ pub async fn dictation_install(state: State<'_, Dictation>, offline: bool) -> Re
     } else {
         None
     };
-    blocking(move || {
-        state.prepare(Model::Installing, || {
-            engine::install_model(&state.model_path(), import.as_deref())
-        })
-    })
-    .await
+    blocking(move || state.activate(model, Model::Installing, import.as_deref())).await
 }
 
 #[tauri::command]
@@ -465,9 +450,9 @@ pub async fn dictation_action(action: Action, state: State<'_, Dictation>) -> Re
 }
 
 #[tauri::command]
-pub fn dictation_languages() -> Vec<(&'static str, &'static str)> {
-    // Whisper base has 99 language tokens. Cantonese was added with large-v3.
-    let mut items: Vec<_> = (0..99)
+pub fn dictation_languages(state: State<'_, Dictation>) -> Vec<(&'static str, &'static str)> {
+    let count = state.lock().active.map_or(99, |m| m.languages);
+    let mut items: Vec<_> = (0..count)
         .filter_map(|id| {
             Some((
                 whisper_rs::get_lang_str(id)?,
@@ -516,6 +501,10 @@ pub fn dictation_options(state: State<'_, Dictation>) -> Result<SpeechOptions> {
 #[tauri::command]
 pub fn dictation_set_options(state: State<'_, Dictation>, options: SpeechOptions) -> Result<()> {
     options.validate()?;
+    let session = state.lock();
+    if let Some(model) = session.active {
+        model.check_options(&options)?;
+    }
     library::update(&state.dir, |db| {
         db.options = options;
         Ok(())
@@ -583,9 +572,11 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let dictation = Dictation::new(dir.path().into());
         dictation
-            .prepare(Model::Installing, || {
-                engine::install_model(&dictation.model_path(), Some(&model))
-            })
+            .activate(
+                catalog::find("base").unwrap(),
+                Model::Installing,
+                Some(&model),
+            )
             .unwrap();
         library::update(&dictation.dir, |db| {
             db.options.language = Some("en".into());

@@ -534,8 +534,13 @@ pub async fn meeting_schedule(
     event.validate()?;
     let key = format!("{:x}", Sha256::digest(event.uid.as_bytes()));
     let state = state.inner().clone();
-    if mode == Mode::Local && !app.state::<crate::dictation::Dictation>().meeting_ready() {
-        return Err("Install the speech model in Dictate before scheduling local notes.");
+    if mode == Mode::Local {
+        if local::sources().is_empty() {
+            return Err("Local meeting audio is unavailable on this platform. Choose the self-hosted participant.");
+        }
+        if !app.state::<crate::dictation::Dictation>().meeting_ready() {
+            return Err("Install a speech model in Models before scheduling local notes.");
+        }
     }
     work(move || {
         let profile = store::read(&state.dir)?.profile;

@@ -40,7 +40,7 @@ export function RecorderPill({
   const response = Math.min(1.3, Math.max(0.7, sensitivity));
 
   return (
-    <div className="flex min-h-16 w-full items-center gap-4 rounded-full border border-line bg-surface-raised px-3 py-2 sm:px-4">
+    <div className="recorder-strip flex min-h-16 w-full items-center gap-4 rounded-full border border-line bg-surface-raised px-3 py-2 sm:px-4">
       <div className="flex min-w-20 shrink-0 items-center gap-2">
         <StatusDot tone={active ? "success" : "neutral"} />
         <span className="text-xs font-medium text-ink-soft">{label}</span>

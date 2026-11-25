@@ -13,6 +13,10 @@ const buttonVariantClasses: Record<ButtonVariant, string> = {
   danger: "bg-danger text-surface-raised hover:opacity-90",
 };
 
+export function ShortcutHint({ children }: { children: ReactNode }) {
+  return <kbd aria-hidden="true" className="vyrra-kbd">{children}</kbd>;
+}
+
 export function Button({
   variant = "primary",
   className,
@@ -25,7 +29,7 @@ export function Button({
     <button
       type={type}
       className={cn(
-        "inline-flex min-h-10 items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:cursor-not-allowed disabled:opacity-45",
+        "vyrra-button inline-flex items-center justify-center font-medium focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:cursor-not-allowed disabled:opacity-45",
         buttonVariantClasses[variant],
         className,
       )}
@@ -49,7 +53,7 @@ export function ActionLink({
     <a
       href={href}
       className={cn(
-        "inline-flex min-h-10 items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-focus",
+        "vyrra-button inline-flex items-center justify-center font-medium focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-focus",
         buttonVariantClasses[variant],
         className,
       )}
@@ -147,14 +151,14 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <header className="flex flex-col gap-5 border-b border-line pb-7 sm:flex-row sm:items-end sm:justify-between">
+    <header className="flex flex-col gap-3 border-b border-line pb-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="max-w-3xl">
         {eyebrow && (
           <p className="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-ink-faint">
             {eyebrow}
           </p>
         )}
-        <h1 className="text-balance text-3xl font-semibold tracking-[-0.035em] text-ink sm:text-[2.45rem] sm:leading-[1.08]">
+        <h1 className="vyrra-page-title text-balance text-ink">
           {title}
         </h1>
         {description && (

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Download, FolderOpen, Sparkles, X } from "lucide-react";
+import { Download, FolderOpen, LoaderCircle, Sparkles, X } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 import { Button } from "./ui";
 import { QuietIcon } from "./QuietIcon";
@@ -18,6 +18,7 @@ export function WritingTools({
   const [open, setOpen] = useState(false),
     [ready, setReady] = useState<boolean>(),
     [busy, setBusy] = useState(false),
+    [installing, setInstalling] = useState<"download" | "import" | null>(null),
     [task, setTask] = useState(initial),
     [instruction, setInstruction] = useState(""),
     [answer, setAnswer] = useState(""),
@@ -37,6 +38,11 @@ export function WritingTools({
       setBusy(false);
     }
   }
+  async function install(offline: boolean) {
+    setInstalling(offline ? "import" : "download");
+    try { await run(async () => { await invoke("writing_install", {offline}); await status(); }); }
+    finally { setInstalling(null); }
+  }
   return (
     <div>
       <QuietIcon
@@ -55,29 +61,11 @@ export function WritingTools({
         >
           {ready === false ? (
             <div className="flex flex-wrap items-center gap-2 text-sm text-ink-soft">
-              <span>Local writing model · 1.12 GB</span>
-              <QuietIcon
-                icon={Download}
-                disabled={busy}
-                label="Download local writing model"
-                onClick={() =>
-                  void run(async () => {
-                    await invoke("writing_install", { offline: false });
-                    await status();
-                  })
-                }
-              />
-              <QuietIcon
-                icon={FolderOpen}
-                label="Choose writing model folder"
-                disabled={busy}
-                onClick={() =>
-                  void run(async () => {
-                    await invoke("writing_install", { offline: true });
-                    await status();
-                  })
-                }
-              />
+              <a href="#/models" className="model-route">Qwen 2.5 · 1.12 GB</a>
+              <QuietIcon icon={installing === "download" ? LoaderCircle : Download} className={installing === "download" ? "vyrra-busy" : ""}
+                disabled={busy} aria-busy={installing === "download"} label="Download local writing model" onClick={() => void install(false)} />
+              <QuietIcon icon={installing === "import" ? LoaderCircle : FolderOpen} className={installing === "import" ? "vyrra-busy" : ""}
+                disabled={busy} aria-busy={installing === "import"} label="Choose writing model folder" onClick={() => void install(true)} />
             </div>
           ) : (
             ready && (

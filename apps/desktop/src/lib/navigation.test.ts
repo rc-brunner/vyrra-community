@@ -10,13 +10,14 @@ describe("navigation", () => {
   it.each([
     ["#/capture", "capture"],
     ["#capture", "capture"],
+    ["#/models", "models"],
     ["#/settings/privacy", "settings"],
     ["#/library/item", "library"],
   ] as const)("parses %s as the %s route", (hash, expected) => {
     expect(routeFromHash(hash)).toBe(expected);
   });
 
-  it.each(["", "#", "#/", "#/unknown", "#/Capture", "#/models"])(
+  it.each(["", "#", "#/", "#/unknown", "#/Capture"])(
     "falls back to dictation for an unsupported hash: %s",
     (hash) => {
       expect(routeFromHash(hash)).toBe("capture");

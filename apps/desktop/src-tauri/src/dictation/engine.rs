@@ -8,64 +8,101 @@ use sha2::{Digest, Sha256};
 use tempfile::NamedTempFile;
 use whisper_rs::{FullParams, SamplingStrategy, WhisperContext, WhisperContextParameters};
 
-pub const MODEL_FILE: &str = "ggml-base.bin";
-const MODEL_BYTES: u64 = 147_951_465;
-const MODEL_SHA256: &str = "60ed5bc3dd14eea856493d334349b405782ddcaf0028d4b5df4088345fba2efe";
-const MODEL_URL: &str = "https://huggingface.co/ggerganov/whisper.cpp/resolve/5359861c739e955e79d9a303bcbc70fb988958b1/ggml-base.bin";
-const DAMAGED: &str = "The speech model failed its integrity check. Install it again.";
-
+use super::catalog::{SpeechModel, Stage};
+const DAMAGED: &str =
+    "The speech model failed its integrity check. Download it again or import the matching file.";
 pub type Result<T> = std::result::Result<T, &'static str>;
 
-fn load_bytes(bytes: &[u8]) -> Result<WhisperContext> {
-    // The default C debug logger writes individual recognized tokens to stderr.
-    // Both hooks discard output with our logging backend features disabled.
-    whisper_rs::install_logging_hooks();
-    if bytes.len() as u64 != MODEL_BYTES || format!("{:x}", Sha256::digest(bytes)) != MODEL_SHA256 {
+pub fn load_model(
+    model: &SpeechModel,
+    path: &Path,
+    mut progress: impl FnMut(Stage, u64) -> Result<()>,
+) -> Result<WhisperContext> {
+    let mut file =
+        File::open(path).map_err(|_| "Install the speech model on this device first.")?;
+    if file.metadata().map_err(|_| DAMAGED)?.len() != model.bytes {
         return Err(DAMAGED);
     }
+    let len =
+        usize::try_from(model.bytes).map_err(|_| "Choose a smaller model for this device.")?;
+    let mut bytes = Vec::new();
+    bytes
+        .try_reserve_exact(len)
+        .map_err(|_| "There is not enough memory. Choose a smaller speech model.")?;
+    let mut hash = Sha256::new();
+    let mut chunk = vec![0; 256 * 1024];
+    loop {
+        progress(Stage::Verifying, bytes.len() as u64)?;
+        let count = file.read(&mut chunk).map_err(|_| DAMAGED)?;
+        if count == 0 {
+            break;
+        }
+        if count > len - bytes.len() {
+            return Err(DAMAGED);
+        }
+        hash.update(&chunk[..count]);
+        bytes.extend_from_slice(&chunk[..count]);
+    }
+    if bytes.len() != len || format!("{:x}", hash.finalize()) != model.sha256 {
+        return Err(DAMAGED);
+    }
+    // Decode exactly the bytes checked above. Disable Whisper's default transcript logging.
+    whisper_rs::install_logging_hooks();
     let mut options = WhisperContextParameters::default();
     options.use_gpu(false);
-    WhisperContext::new_from_buffer_with_params(bytes, options)
-        .map_err(|_| "The local speech engine could not load the model.")
+    WhisperContext::new_from_buffer_with_params(&bytes, options)
+        .map_err(|_| "The local speech engine could not load this model. Try a smaller model.")
 }
 
-pub fn load_model(path: &Path) -> Result<WhisperContext> {
-    let file = File::open(path).map_err(|_| "Install the speech model on this device first.")?;
-    let mut bytes = Vec::new();
-    file.take(MODEL_BYTES + 1)
-        .read_to_end(&mut bytes)
-        .map_err(|_| DAMAGED)?;
-    load_bytes(&bytes)
-}
-
-pub fn install_model(path: &Path, offline: Option<&Path>) -> Result<WhisperContext> {
+pub fn install_model(
+    model: &SpeechModel,
+    path: &Path,
+    offline: Option<&Path>,
+    mut progress: impl FnMut(Stage, u64) -> Result<()>,
+) -> Result<WhisperContext> {
     let parent = path.parent().ok_or("The model folder is unavailable.")?;
     fs::create_dir_all(parent).map_err(|_| "The model folder could not be opened.")?;
     let mut file = NamedTempFile::new_in(parent).map_err(|_| "There is no space for the model.")?;
-    let source: Box<dyn Read> = if let Some(local) = offline {
+    let mut source: Box<dyn Read> = if let Some(local) = offline {
         Box::new(File::open(local).map_err(|_| "The selected model could not be opened.")?)
     } else {
         let agent: ureq::Agent = ureq::Agent::config_builder()
-            .timeout_global(Some(Duration::from_secs(900)))
+            .timeout_global(Some(Duration::from_secs(1800)))
             .https_only(true)
             .build()
             .into();
         let response = agent
-            .get(MODEL_URL)
+            .get(&model.url())
             .call()
-            .map_err(|_| "The model download failed. Retry or choose a downloaded model.")?;
+            .map_err(|_| "The model download failed. Retry or import a local file.")?;
         Box::new(response.into_body().into_reader())
     };
-    let bytes = std::io::copy(&mut source.take(MODEL_BYTES + 1), &mut file)
-        .map_err(|_| "The model transfer was interrupted. Please retry.")?;
-    if bytes != MODEL_BYTES {
+    let mut chunk = vec![0; 256 * 1024];
+    let mut received = 0;
+    loop {
+        progress(Stage::Transferring, received)?;
+        let count = source
+            .read(&mut chunk)
+            .map_err(|_| "The model transfer was interrupted. Please retry.")?;
+        if count == 0 {
+            break;
+        }
+        received += count as u64;
+        if received > model.bytes {
+            return Err(DAMAGED);
+        }
+        file.write_all(&chunk[..count])
+            .map_err(|_| "The model could not be saved. Check available disk space.")?;
+    }
+    if received != model.bytes {
         return Err(DAMAGED);
     }
     file.flush().map_err(|_| "The model could not be saved.")?;
-    let model = load_model(file.path())?;
+    let context = load_model(model, file.path(), &mut progress)?;
+    progress(Stage::Verifying, received)?;
     file.persist(path)
         .map_err(|_| "The verified model could not be installed.")?;
-    Ok(model)
+    Ok(context)
 }
 
 #[derive(Clone, Default, Deserialize, Serialize)]
@@ -91,7 +128,7 @@ impl SpeechOptions {
             && (lang.is_empty()
                 || lang.len() > 12
                 || !lang.bytes().all(|b| b.is_ascii_lowercase())
-                || !whisper_rs::get_lang_id(lang).is_some_and(|id| (0..99).contains(&id)))
+                || !whisper_rs::get_lang_id(lang).is_some_and(|id| (0..100).contains(&id)))
         {
             return Err("Choose a supported source language.");
         }
