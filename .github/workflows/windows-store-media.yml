@@ -15,7 +15,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [windows-2025]
+        include:
+          - { image: windows-2022, sample: a }
+          - { image: windows-2022, sample: b }
+          - { image: windows-2025, sample: c }
     runs-on: ${{ matrix.image }}
     timeout-minutes: 15
     steps:
@@ -69,7 +72,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $ErrorActionPreference = 'Stop'
-          $run = '45528243673'
+          $run = '45553046930'
           $repository = $env:GITHUB_REPOSITORY
           gh run download $run --repo $repository --name vyrra-Windows-x64 --dir package
           if ($LASTEXITCODE) { throw 'Installer download failed.' }
@@ -87,9 +90,14 @@ jobs:
           # Only this test process on the disposable runner enables WebView2 inspection.
           $env:WEBVIEW2_USER_DATA_FOLDER = Join-Path $env:RUNNER_TEMP 'VyrraTestWebView'
           $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS = '--remote-debugging-port=9222 --remote-debugging-address=127.0.0.1 --force-renderer-accessibility'
+          $testPolicy = 'HKCU:\Software\Policies\Microsoft\Edge\WebView2\AdditionalBrowserArguments'
+          New-Item -Path $testPolicy -Force | Out-Null
+          New-ItemProperty -Path $testPolicy -Name $app[0].Name -Value $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS -PropertyType String -Force | Out-Null
           Get-CimInstance Win32_Processor | Select-Object -ExpandProperty Name
           $started = Get-Date
-          $window = Start-Process $app[0].FullName -PassThru
+          $launch = [Diagnostics.ProcessStartInfo]::new($app[0].FullName)
+          $launch.UseShellExecute = $false
+          $window = [Diagnostics.Process]::Start($launch)
           try {
             node apps/desktop/store-preview/capture.mjs
             if ($LASTEXITCODE) { throw 'The native app did not complete the Store preview.' }
@@ -123,6 +131,6 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
-          name: vyrra-windows-store-screenshots-${{ matrix.image }}
+          name: vyrra-windows-store-screenshots-${{ matrix.image }}-${{ matrix.sample }}
           path: store-screenshots/*.png
           if-no-files-found: warn
