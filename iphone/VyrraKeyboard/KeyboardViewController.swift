@@ -298,6 +298,7 @@ class KeyboardViewController: UIInputViewController {
         view.addSubview(guidanceBubble)
 
         guidanceLabel.translatesAutoresizingMaskIntoConstraints = false
+        guidanceLabel.accessibilityIdentifier = "keyboard-guidance"
         guidanceLabel.font = .systemFont(ofSize: 12, weight: .medium)
         guidanceLabel.numberOfLines = 0
         guidanceBubble.addSubview(guidanceLabel)
@@ -451,8 +452,9 @@ class KeyboardViewController: UIInputViewController {
         // tap must not bring back the keys or re-enable the other button.
         let inPhrase = session.state == .listening || session.state == .paused
         let endingPhrase = pendingCommand?.type == .finish || pendingCommand?.type == .cancel
-        let showPanel = hasSharedContainer && (inPhrase || endingPhrase)
-        if inPhrase && hasSharedContainer {
+        let finishing = session.state == .processing && showsDictationPanel
+        let showPanel = hasSharedContainer && (inPhrase || endingPhrase || finishing)
+        if showPanel {
             dictationPanel.update(for: session.state, pending: pendingCommand?.type)
         }
         if !showPanel {

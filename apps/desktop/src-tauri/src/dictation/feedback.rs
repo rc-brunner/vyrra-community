@@ -9,6 +9,8 @@ use std::{io::Cursor, sync::mpsc, time::Duration};
 #[serde(rename_all = "lowercase")]
 pub enum Sound {
     #[default]
+    Studio,
+    Porcelain,
     Classic,
     Soft,
     Felt,
@@ -18,6 +20,10 @@ pub enum Sound {
 impl Sound {
     fn sample(self, closing: bool) -> Option<&'static [u8]> {
         Some(match (self, closing) {
+            (Self::Studio, false) => include_bytes!("../../sounds/studio-engage.wav"),
+            (Self::Studio, true) => include_bytes!("../../sounds/studio-release.wav"),
+            (Self::Porcelain, false) => include_bytes!("../../sounds/porcelain-engage.wav"),
+            (Self::Porcelain, true) => include_bytes!("../../sounds/porcelain-release.wav"),
             (Self::Classic, false) => include_bytes!("../../sounds/engage.wav"),
             (Self::Classic, true) => include_bytes!("../../sounds/release.wav"),
             (Self::Soft, false) => include_bytes!("../../sounds/soft-engage.wav"),
@@ -168,7 +174,13 @@ mod tests {
     use super::*;
     #[test]
     fn every_preset_has_distinct_short_open_and_close_cues() {
-        for sound in [Sound::Classic, Sound::Soft, Sound::Felt] {
+        for sound in [
+            Sound::Studio,
+            Sound::Felt,
+            Sound::Porcelain,
+            Sound::Classic,
+            Sound::Soft,
+        ] {
             let open = sound.sample(false).unwrap();
             let close = sound.sample(true).unwrap();
             assert_ne!(open, close);

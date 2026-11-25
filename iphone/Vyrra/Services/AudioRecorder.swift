@@ -40,7 +40,9 @@ final class AudioRecorder: ObservableObject {
     private static let minimumLevelPublishInterval: TimeInterval = 1.0 / 50.0
     private static let recordingStartTimeout: TimeInterval = 12
 
-    @Published private(set) var isRecording = false
+    @Published private(set) var isRecording = false {
+        didSet { if oldValue && !isRecording { keyboardMeter?.clear() } }
+    }
     @Published private(set) var isStarting = false
     @Published private(set) var level: Double = 0
     @Published private(set) var interruptionMessage: String?
@@ -57,6 +59,7 @@ final class AudioRecorder: ObservableObject {
     private var maximumDurationWorkItem: DispatchWorkItem?
     private var keyboardEngine: AVAudioEngine?
     private let keyboardCapture = KeyboardPhraseCapture()
+    private lazy var keyboardMeter = KeyboardLevelMeter(writable: true)
     private var keyboardSessionMonitor: Timer?
     private var keyboardInactivity = KeyboardInactivityTracker()
     private var keyboardPhraseIsProcessing = false
@@ -251,6 +254,7 @@ final class AudioRecorder: ObservableObject {
         let timer = Timer(timeInterval: Self.minimumLevelPublishInterval, repeats: true) { [weak self] _ in
             guard let self else { return }
             self.level = self.isRecording ? self.keyboardCapture.level : 0
+            if self.isRecording { self.keyboardMeter?.publish(self.level) }
         }
         levelTimer = timer
         RunLoop.main.add(timer, forMode: .common)
@@ -296,7 +300,7 @@ final class AudioRecorder: ObservableObject {
     /// "you're live" cues (VoiceOver speech, haptics) don't land in the
     /// recording. It is skipped when the start fails earlier.
     @MainActor
-    func startRecording(beforeCapture: @MainActor () async -> Void = {}) async throws {
+    func startRecording(publishToKeyboard: Bool = false, beforeCapture: @MainActor () async -> Void = {}) async throws {
         guard !isRecording else { return }
         guard !isStarting, !isPreparingKeyboardPhrase else { throw AudioRecorderError.recordingAlreadyStarting }
         if keyboardSession != nil {
@@ -343,7 +347,7 @@ final class AudioRecorder: ObservableObject {
             recordingStartDate = Date()
             isRecording = true
             level = 0.08
-            startLevelMetering()
+            startLevelMetering(publishToKeyboard: publishToKeyboard)
             scheduleMaximumDurationWatchdog()
         } catch {
             recorder?.stop()
@@ -607,7 +611,7 @@ final class AudioRecorder: ObservableObject {
         AVLinearPCMIsFloatKey: false
     ]
 
-    private func startLevelMetering() {
+    private func startLevelMetering(publishToKeyboard: Bool) {
         levelTimer?.invalidate()
         let timer = Timer(timeInterval: Self.minimumLevelPublishInterval, repeats: true) { [weak self] _ in
             guard let self, let recorder = self.recorder, recorder.isRecording else { return }
@@ -617,6 +621,7 @@ final class AudioRecorder: ObservableObject {
             let target = Self.normalizedMeterLevel(decibels: decibels)
             let smoothing = target > self.level ? 0.88 : 0.30
             self.level += (target - self.level) * smoothing
+            if publishToKeyboard { self.keyboardMeter?.publish(self.level) }
         }
         levelTimer = timer
         RunLoop.main.add(timer, forMode: .common)

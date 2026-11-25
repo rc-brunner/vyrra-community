@@ -6,3 +6,5 @@ Third-party components keep their own licenses. The iPhone acknowledgments are
 in iphone/Vyrra/Resources/ThirdPartyLicenses. Speech and writing model weights
 are separate optional downloads. OpenAI Whisper is MIT licensed and Qwen2.5
 1.5B Instruct is Apache-2.0 licensed. Attendee is an optional separately deployed project with its own license.
+
+The Studio, Felt and Porcelain feedback sounds include edited CC0 source recordings from Kenney Interface Sounds (https://kenney.nl/assets/interface-sounds).

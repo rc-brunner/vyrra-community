@@ -5,9 +5,11 @@ import { QuietIcon } from "./QuietIcon";
 import { type Sound, message } from "../lib/dictation";
 
 const choices = {
+  studio: "Studio latch",
   classic: "Classic",
   soft: "Soft click",
   felt: "Felt thud",
+  porcelain: "Porcelain",
   off: "Off",
 } as const;
 const sounds = Object.keys(choices) as Sound[];

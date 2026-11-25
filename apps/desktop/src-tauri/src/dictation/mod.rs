@@ -204,8 +204,10 @@ impl Dictation {
     }
 
     #[cfg(test)]
-    fn snapshot(&self) -> Snapshot {self.snapshot_for(None,true)}
-    fn snapshot_for(&self, since:Option<u64>, include_text:bool) -> Snapshot {
+    fn snapshot(&self) -> Snapshot {
+        self.snapshot_for(None, true)
+    }
+    fn snapshot_for(&self, since: Option<u64>, include_text: bool) -> Snapshot {
         let mut s = self.lock();
         let (elapsed_ms, level, disconnected) = s
             .mic
@@ -225,7 +227,11 @@ impl Dictation {
             } else {
                 0.0
             },
-            text: if include_text && since != Some(s.revision) {s.text.clone()} else {String::new()},
+            text: if include_text && since != Some(s.revision) {
+                s.text.clone()
+            } else {
+                String::new()
+            },
             revision: s.revision,
             error: s.error.clone(),
             delivery: s.delivery,
@@ -348,8 +354,12 @@ pub fn setup(app: &AppHandle) -> std::result::Result<(), Box<dyn std::error::Err
 }
 
 #[tauri::command]
-pub fn dictation_status(state: State<'_, Dictation>,window:tauri::Window,since:Option<u64>) -> Snapshot {
-    state.snapshot_for(since,window.label()=="main")
+pub fn dictation_status(
+    state: State<'_, Dictation>,
+    window: tauri::Window,
+    since: Option<u64>,
+) -> Snapshot {
+    state.snapshot_for(since, window.label() == "main")
 }
 
 async fn blocking<T: Send + 'static>(f: impl FnOnce() -> Result<T> + Send + 'static) -> Result<T> {

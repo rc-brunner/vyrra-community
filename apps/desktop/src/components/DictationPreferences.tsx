@@ -19,7 +19,7 @@ function PreferencesForm({
   value: SpeechOptions;
   languages: string[][];
 }) {
-  const [sound, setSound] = useState(value.sound ?? "classic");
+  const [sound, setSound] = useState(value.sound ?? "studio");
   const [panelSounds, setPanelSounds] = useState(value.panelSounds ?? false);
   const [savingFeedback,setSavingFeedback] = useState(false);
   const [language, setLanguage] = useState(value.language ?? "");

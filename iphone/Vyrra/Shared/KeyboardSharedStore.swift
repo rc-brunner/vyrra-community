@@ -1,3 +1,4 @@
+import Darwin
 import Foundation
 import notify
 
@@ -447,6 +448,59 @@ struct KeyboardDiagnosticEntry: Codable, Equatable, Identifiable {
         self.type = type
         self.detail = detail
         self.createdAt = createdAt
+    }
+}
+
+/// A single quantized loudness reading shared only with the keyboard extension.
+/// Both processes reuse their file descriptor. The file contains no samples or text.
+final class KeyboardLevelMeter {
+    private let url: URL
+    private let writable: Bool
+    private var descriptor: Int32 = -1
+    private var lastPublished: TimeInterval = -.infinity
+    static let interval: TimeInterval = 1.0 / 12.0
+
+    init?(writable: Bool, container: URL? = KeyboardSharedStore.defaultContainerURL()) {
+        guard let container else { return nil }
+        url = container.appendingPathComponent("Library/Caches/VyrraMeter/level", isDirectory: false)
+        self.writable = writable
+    }
+
+    deinit { if descriptor >= 0 { Darwin.close(descriptor) } }
+
+    private func openIfNeeded() -> Bool {
+        if descriptor >= 0 { return true }
+        if writable {
+            do {
+                try FileManager.default.createDirectory(at: url.deletingLastPathComponent(),
+                                                        withIntermediateDirectories: true)
+            } catch { return false }
+        }
+        let flags = (writable ? O_CREAT | O_RDWR : O_RDONLY) | O_CLOEXEC | O_NOFOLLOW
+        descriptor = url.withUnsafeFileSystemRepresentation { Darwin.open($0!, flags, mode_t(0o600)) }
+        return descriptor >= 0
+    }
+
+    func publish(_ level: Double, now: TimeInterval = ProcessInfo.processInfo.systemUptime) {
+        guard writable, level.isFinite, now - lastPublished >= Self.interval, openIfNeeded() else { return }
+        let amplitude = UInt64((min(1, max(0, level)) * 255).rounded())
+        var reading = (UInt64(now * 1000) << 8) | amplitude
+        if pwrite(descriptor, &reading, 8, 0) == 8 { lastPublished = now }
+    }
+
+    func clear() {
+        guard writable, descriptor >= 0 else { return }
+        var zero: UInt64 = 0
+        _ = pwrite(descriptor, &zero, 8, 0)
+        lastPublished = -.infinity
+    }
+
+    func latest(now: TimeInterval = ProcessInfo.processInfo.systemUptime) -> Double {
+        var reading: UInt64 = 0
+        guard openIfNeeded(), pread(descriptor, &reading, 8, 0) == 8, reading != 0 else { return 0 }
+        let age = now - Double(reading >> 8) / 1000
+        guard age >= 0, age < 0.35 else { return 0 }
+        return Double(reading & 255) / 255
     }
 }
 

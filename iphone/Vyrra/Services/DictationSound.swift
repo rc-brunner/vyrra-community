@@ -7,9 +7,9 @@ enum DictationSound {
     nonisolated static let preferenceKey = "dictationSoundsEnabled"
     nonisolated static let paletteKey = "dictationSoundPalette"
     enum Palette: String, CaseIterable {
-        case classic, soft, felt, off
+        case studio, classic, soft, felt, porcelain, off
         var label: String {
-            switch self { case .classic: "Classic"; case .soft: "Soft click"; case .felt: "Felt thud"; case .off: "Off" }
+            switch self { case .studio: "Studio latch"; case .porcelain: "Porcelain"; case .classic: "Classic"; case .soft: "Soft click"; case .felt: "Felt thud"; case .off: "Off" }
         }
         func file(closing: Bool) -> String? {
             guard self != .off else { return nil }
@@ -18,7 +18,7 @@ enum DictationSound {
     }
     static func palette(in defaults: UserDefaults = .standard) -> Palette {
         guard (defaults.object(forKey: preferenceKey) as? Bool ?? true) else { return .off }
-        return defaults.string(forKey: paletteKey).flatMap(Palette.init(rawValue:)) ?? .classic
+        return defaults.string(forKey: paletteKey).flatMap(Palette.init(rawValue:)) ?? .studio
     }
     private static var cached: [String: SystemSoundID] = [:]
 
@@ -54,10 +54,10 @@ enum DictationSound {
 
 struct DictationSoundPicker: View {
     @AppStorage(DictationSound.preferenceKey) private var enabled = true
-    @AppStorage(DictationSound.paletteKey) private var stored = DictationSound.Palette.classic.rawValue
+    @AppStorage(DictationSound.paletteKey) private var stored = DictationSound.Palette.studio.rawValue
     @State private var preview: Task<Void, Never>?
     @State private var playing = false
-    private var selected: DictationSound.Palette { enabled ? DictationSound.Palette(rawValue: stored) ?? .classic : .off }
+    private var selected: DictationSound.Palette { enabled ? DictationSound.Palette(rawValue: stored) ?? .studio : .off }
     var body: some View {
         HStack {
             Text("Dictation sound")

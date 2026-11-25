@@ -346,11 +346,69 @@ mod tests {
             None,
         )
         .unwrap();
-        assert_eq!(read["bot_name"], profile.name);
+        assert_eq!(read["deduplication_key"], key);
+        assert_eq!(read["state"], "scheduled");
         let mut moved = event;
         moved.start_ms += 3600000;
         client.reschedule(&first.id, &moved).unwrap();
         client.stop(&first.id, true).unwrap();
         assert!(client.lookup(&key).unwrap().is_none());
+    }
+}
+
+#[cfg(test)]
+mod admitted_room_test {
+    use super::*;
+    /// Operator creates and hosts an empty test room. The marker ends the check after its tile and chat message have been inspected.
+    #[test]
+    #[ignore = "requires an explicitly authorized empty external test room and an isolated loopback Attendee deployment"]
+    fn observe_named_participant_in_private_test_room() {
+        let dir = std::path::PathBuf::from(std::env::var("VYRRA_TEST_MEET_DIR").unwrap());
+        let link = std::fs::read_to_string(dir.join("room")).unwrap();
+        let server = address(&std::env::var("VYRRA_TEST_ATTENDEE_ORIGIN").unwrap()).unwrap();
+        assert!(server.starts_with("http://127.0.0.1:"));
+        let key = std::fs::read_to_string(std::env::var("VYRRA_TEST_ATTENDEE_KEY_FILE").unwrap())
+            .unwrap();
+        let client = Client {
+            server,
+            key: key.trim().into(),
+        };
+        let now = super::super::now();
+        let event = Event {
+            uid: "explicit-empty-room".into(),
+            title: "Private QA".into(),
+            url: link.trim().into(),
+            start_ms: now + 20_000,
+            end_ms: now + 300_000,
+        };
+        event.validate().unwrap();
+        let profile = Profile {
+            name: "Vyrra Studio Scribe".into(),
+            image: Some(picture(&dir.join("avatar.png")).unwrap()),
+            ..Profile::default()
+        };
+        let bot = client
+            .schedule(&event, &profile, &format!("vyrra-visual-{now}"))
+            .unwrap();
+        std::fs::write(dir.join("bot"), &bot.id).unwrap();
+        let mut admitted = false;
+        let mut previous = String::new();
+        for _ in 0..120 {
+            let state = client.status(&bot.id).unwrap().state;
+            if state != previous {
+                println!("Participant state: {state}");
+                previous = state.clone();
+            }
+            admitted |= state.starts_with("joined_");
+            if super::super::terminal(&state) || dir.join("finish").exists() {
+                break;
+            }
+            std::thread::sleep(Duration::from_secs(3));
+        }
+        let last = client.status(&bot.id).unwrap().state;
+        if !super::super::terminal(&last) {
+            client.stop(&bot.id, last == "scheduled").unwrap();
+        }
+        assert!(admitted, "Provider admission was not observed.");
     }
 }

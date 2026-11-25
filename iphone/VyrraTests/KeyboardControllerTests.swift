@@ -409,10 +409,11 @@ final class KeyboardControllerTests: XCTestCase {
         try tap("Finish Vyrra dictation", on: keyboard)
         let retry = try XCTUnwrap(keyboard.writtenCommands.last)
         publish(.processing, acknowledgment: .init(commandID: retry.id, accepted: true))
-        XCTAssertTrue(panel.isHidden)
-        try tap("q", on: keyboard)
-        XCTAssertEqual(keyboard.host.text, "q")
-        XCTAssertEqual(button.accessibilityLabel, "Vyrra is preparing text")
+        XCTAssertFalse(panel.isHidden)
+        XCTAssertFalse(panel.finishButton.isEnabled)
+        XCTAssertFalse(panel.cancelButton.isEnabled)
+        XCTAssertEqual(panel.finishButton.accessibilityValue, "Finishing")
+        XCTAssertEqual(keyboard.host.text, "")
         XCTAssertNil(visibleGuidanceLabel(keyboard))
         XCTAssertEqual(button.configuration?.baseBackgroundColor, background)
         XCTAssertEqual(keyboard.finishFeedbackCount, 1)
@@ -434,7 +435,7 @@ final class KeyboardControllerTests: XCTestCase {
         let secondCancel = try XCTUnwrap(keyboard.writtenCommands.last)
         publish(.ready, acknowledgment: .init(commandID: secondCancel.id, accepted: true))
         XCTAssertTrue(panel.isHidden)
-        XCTAssertEqual(keyboard.host.text, "q")
+        XCTAssertEqual(keyboard.host.text, "")
         XCTAssertEqual(keyboard.finishFeedbackCount, 1)
     }
 
@@ -503,7 +504,7 @@ final class KeyboardControllerTests: XCTestCase {
     private func visibleGuidanceLabel(_ keyboard: TestKeyboard) -> UILabel? {
         func find(in view: UIView) -> UILabel? {
             guard !view.isHidden, !(view is UIButton) else { return nil }
-            if let label = view as? UILabel, label.text != nil { return label }
+            if let label = view as? UILabel, label.accessibilityIdentifier == "keyboard-guidance" { return label }
             return view.subviews.lazy.compactMap { find(in: $0) }.first
         }
         return find(in: keyboard.view)
@@ -521,6 +522,40 @@ final class KeyboardControllerTests: XCTestCase {
         let bars = try XCTUnwrap(wave.layer.sublayers)
         XCTAssertEqual(bars.count, 11)
         return (window, wave, bars)
+    }
+
+    func testMicrophoneMeterShowsOnlyFreshLevelsAndDropsCancelledAudio() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let reader = try XCTUnwrap(KeyboardLevelMeter(writable: false, container: root))
+        let writer = try XCTUnwrap(KeyboardLevelMeter(writable: true, container: root))
+        XCTAssertEqual(reader.latest(now: 10), 0)
+        writer.publish(0.75, now: 10)
+        XCTAssertEqual(reader.latest(now: 10.1), 0.75, accuracy: 0.01)
+        XCTAssertEqual(reader.latest(now: 10.5), 0)
+        writer.publish(1, now: 11)
+        XCTAssertEqual(reader.latest(now: 11), 1)
+        writer.clear()
+        XCTAssertEqual(reader.latest(now: 11.01), 0)
+    }
+
+    func testPanelBarsRespondToLevelAndHoldStillWithReduceMotion() throws {
+        let (window, wave, bars) = try waveform()
+        defer { window.isHidden = true }
+        var amplitude: CGFloat = 0
+        wave.levelSource = { amplitude }
+        wave.activity = .listening
+        let last = try XCTUnwrap(bars.last)
+        let quiet = last.bounds.height
+        amplitude = 1
+        RunLoop.main.run(until: Date().addingTimeInterval(0.22))
+        XCTAssertGreaterThan(last.bounds.height, quiet + 4)
+        wave.reduceMotionEnabled = { true }
+        NotificationCenter.default.post(name: UIAccessibility.reduceMotionStatusDidChangeNotification, object: nil)
+        let still = last.bounds.height
+        amplitude = 0
+        RunLoop.main.run(until: Date().addingTimeInterval(0.18))
+        XCTAssertEqual(last.bounds.height, still)
     }
 
     func testListeningWaveformMovesOverTimeAndStopsWhenFinished() throws {

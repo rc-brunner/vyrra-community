@@ -843,6 +843,7 @@ struct RecordView: View {
             modelManager: modelManager,
             cacheSummary: modelCacheSummary,
             modelIsReady: modelIsReady,
+            publishToKeyboard: quickAccessSessionRequestsInsertion,
             clearDiagnostics: recordingDiagnostics.clear,
             onStartCompleted: onStartCompleted
         )

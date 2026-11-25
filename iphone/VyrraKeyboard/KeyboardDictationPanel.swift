@@ -12,11 +12,15 @@ final class KeyboardDictationPanel: UIView {
     private let pauseMark = UIImageView(image: UIImage(systemName: "pause.fill",
         withConfiguration: UIImage.SymbolConfiguration(pointSize: 27, weight: .semibold)))
 
+    private let caption = UILabel()
+    private lazy var microphoneMeter = KeyboardLevelMeter(writable: false)
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         accessibilityIdentifier = "dictation-panel"
         directionalLayoutMargins = NSDirectionalEdgeInsets(top: 12, leading: 12, bottom: 4, trailing: 12)
         insetsLayoutMarginsFromSafeArea = false
+        waveform.levelSource = { [weak self] in CGFloat(self?.microphoneMeter?.latest() ?? 0) }
 
         configure(cancelButton, symbol: "xmark", label: "Cancel Vyrra dictation")
         cancelButton.accessibilityHint = "Discards this phrase and returns to typing."
@@ -33,6 +37,16 @@ final class KeyboardDictationPanel: UIView {
                 mark.centerYAnchor.constraint(equalTo: centerYAnchor, constant: 6)
             ])
         }
+        caption.translatesAutoresizingMaskIntoConstraints = false
+        caption.font = .preferredFont(forTextStyle: .caption1)
+        caption.adjustsFontForContentSizeCategory = true
+        caption.isAccessibilityElement = false
+        caption.textAlignment = .center
+        addSubview(caption)
+        NSLayoutConstraint.activate([
+            caption.centerXAnchor.constraint(equalTo: centerXAnchor),
+            caption.topAnchor.constraint(equalTo: waveform.bottomAnchor, constant: 3)
+        ])
         pauseMark.isHidden = true
         let margins = layoutMarginsGuide
         NSLayoutConstraint.activate([
@@ -65,19 +79,25 @@ final class KeyboardDictationPanel: UIView {
     }
 
     func update(for state: KeyboardSessionState, pending: KeyboardSessionCommandType?) {
-        let paused = state == .paused
-        waveform.isHidden = paused
-        waveform.activity = paused ? .idle : .listening
-        pauseMark.isHidden = !paused
-        finishButton.isEnabled = pending == nil
-        cancelButton.isEnabled = pending == nil
-        let recordingStatus = paused ? "Paused" : "Listening"
-        finishButton.accessibilityValue = pending == .finish ? "Finishing" : recordingStatus
-        cancelButton.accessibilityValue = pending == .cancel ? "Canceling" : nil
+        let phase: String
+        if pending == .cancel { phase = String(localized: "Canceling…") }
+        else if pending == .finish || state == .processing { phase = String(localized: "Finishing…") }
+        else if state == .paused { phase = String(localized: "Paused") }
+        else { phase = String(localized: "Listening") }
+        let live = state == .listening && pending == nil
+        waveform.isHidden = state == .paused
+        waveform.activity = live ? .listening : .idle
+        pauseMark.isHidden = state != .paused
+        finishButton.isEnabled = pending == nil && state != .processing
+        cancelButton.isEnabled = pending == nil && state != .processing
+        caption.text = phase
+        finishButton.accessibilityValue = phase.replacingOccurrences(of: "…", with: "")
+        cancelButton.accessibilityValue = pending == .cancel ? phase : nil
     }
 
     func apply(_ palette: KeyboardPalette) {
         let ink = palette.text.withAlphaComponent(0.82)
+        caption.textColor = ink
         waveform.tintColor = ink
         pauseMark.tintColor = ink
         cancelButton.backgroundColor = palette.key

@@ -12,7 +12,7 @@ The desktop app includes a microphone, push-to-talk and hands-free shortcuts, WA
 
 Choose an accepted calendar call to open locally, or schedule a named participant on your own Attendee server. Choose a participant picture under **Settings → Meetings**. The local writing model supports summaries and transcript questions. Core dictation stays free and uncapped. See the setup and platform limits in the [meeting guide](docs/meetings.md).
 
-**Settings → Dictation** offers Classic, Soft click, Felt thud and Off, with a preview of both cues. Desktop panel sounds are optional. The iPhone sound picker is in Style and Profile.
+**Settings → Dictation** offers Studio latch, Classic, Soft click, Felt thud, Porcelain and Off, with a preview of both cues. Desktop panel sounds are optional. The iPhone sound picker is in Style and Profile.
 
 ## iPhone
 

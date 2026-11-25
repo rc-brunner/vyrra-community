@@ -22,7 +22,7 @@ final class DictationSessionControllerTests: XCTestCase {
         let suite = UUID().uuidString
         let values = try XCTUnwrap(UserDefaults(suiteName: suite))
         defer { values.removePersistentDomain(forName: suite) }
-        XCTAssertEqual(DictationSound.palette(in: values), .classic)
+        XCTAssertEqual(DictationSound.palette(in: values), .studio)
         values.set(false, forKey: DictationSound.preferenceKey)
         XCTAssertEqual(DictationSound.palette(in: values), .off)
         values.set(true, forKey: DictationSound.preferenceKey)

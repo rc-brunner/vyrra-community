@@ -21,6 +21,9 @@ final class KeyboardWaveformView: UIView {
     private let peaks: [CGFloat] = [0.32, 0.55, 0.43, 0.73, 0.88, 1, 0.57, 0.89, 0.71, 0.49, 0.32]
     private var barLayers: [CALayer] = []
     private var laidOutSize: CGSize = .zero
+    var levelSource: (() -> CGFloat)? { didSet { updateAnimations() } }
+    private var meterTimer: Timer?
+    private var recentLevels: [CGFloat] = Array(repeating: 0, count: 11)
     // Read on every transition, including changes while the keyboard is visible.
     var reduceMotionEnabled: () -> Bool = { UIAccessibility.isReduceMotionEnabled }
 
@@ -35,6 +38,7 @@ final class KeyboardWaveformView: UIView {
     }
 
     deinit {
+        meterTimer?.invalidate()
         NotificationCenter.default.removeObserver(self)
     }
 
@@ -81,6 +85,8 @@ final class KeyboardWaveformView: UIView {
     }
 
     private func updateAnimations() {
+        meterTimer?.invalidate()
+        meterTimer = nil
         guard bounds.width > 0, bounds.height > 0 else { return }
         let width = bounds.width / CGFloat(2 * peaks.count - 1)
         let animates = activity == .listening && window != nil && !reduceMotionEnabled()
@@ -92,8 +98,8 @@ final class KeyboardWaveformView: UIView {
             bar.bounds = CGRect(x: 0, y: 0, width: width, height: resting)
             bar.position = CGPoint(x: bounds.minX + (CGFloat(index) * 2 + 0.5) * width, y: bounds.midY)
             bar.cornerRadius = width / 2
-            bar.removeAnimation(forKey: "vyrra.keyboard.wave")
-            guard animates else { continue }
+            bar.removeAllAnimations()
+            guard animates, levelSource == nil else { continue }
 
             // Animate height so the rounded ends keep their radius at every amplitude.
             let pulse = CAKeyframeAnimation(keyPath: "bounds.size.height")
@@ -104,6 +110,30 @@ final class KeyboardWaveformView: UIView {
             pulse.timeOffset = Double((index * 5) % peaks.count) / Double(peaks.count) * pulse.duration
             pulse.repeatCount = .infinity
             bar.add(pulse, forKey: "vyrra.keyboard.wave")
+        }
+        CATransaction.commit()
+        if animates, levelSource != nil {
+            recentLevels = Array(repeating: 0, count: peaks.count)
+            updateMeter()
+            let timer = Timer(timeInterval: 1.0 / 12.0, repeats: true) { [weak self] _ in self?.updateMeter() }
+            meterTimer = timer
+            RunLoop.main.add(timer, forMode: .common)
+        }
+    }
+
+    private func updateMeter() {
+        guard let read = levelSource else { return }
+        recentLevels.removeFirst()
+        recentLevels.append(min(1, max(0, read())))
+        let width = bounds.width / CGFloat(2 * peaks.count - 1)
+        CATransaction.begin()
+        CATransaction.setAnimationDuration(0.085)
+        CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .easeOut))
+        for (index, bar) in barLayers.enumerated() {
+            let amplitude = recentLevels[index]
+            let floor = width + (bounds.height * 0.13 * peaks[index])
+            let height = floor + (bounds.height - floor) * sqrt(amplitude) * (0.55 + 0.45 * peaks[index])
+            bar.bounds = CGRect(x: 0, y: 0, width: width, height: height)
         }
         CATransaction.commit()
     }

@@ -198,6 +198,7 @@ final class DictationSessionController: ObservableObject {
         modelManager: ModelManager,
         cacheSummary: ModelCacheSummary,
         modelIsReady: Bool,
+        publishToKeyboard: Bool = false,
         clearDiagnostics: @escaping () -> Void,
         onStartCompleted: @escaping () -> Void = {}
     ) {
@@ -228,7 +229,7 @@ final class DictationSessionController: ObservableObject {
         Task { @MainActor in
             defer { onStartCompleted() }
             do {
-                try await audioRecorder.startRecording(beforeCapture: {
+                try await audioRecorder.startRecording(publishToKeyboard: publishToKeyboard, beforeCapture: {
                     // Complete the start cues before retaining the first audio buffer.
                     await DictationAnnouncement.recordingStarted.postAndWaitUntilSpoken()
                     HapticManager.recordingStarted()

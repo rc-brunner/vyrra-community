@@ -26,7 +26,7 @@ export interface DictationSnapshot {
   error: string | null;
   delivery: boolean | null;
 }
-export type Sound = "classic" | "soft" | "felt" | "off";
+export type Sound = "studio" | "porcelain" | "classic" | "soft" | "felt" | "off";
 export interface SpeechOptions {
   sound: Sound;
   panelSounds: boolean;

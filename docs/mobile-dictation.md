@@ -1,0 +1,26 @@
+# Mobile dictation and feedback
+
+The microphone owner confirms when a phrase starts. On iPhone the containing app owns the recorder and the extension reads the App Group session. On Android the input method owns a session-bound on-device recognizer. Dictation audio stays on the device. Android currently requires an installed on-device recognition service that supports the selected language.
+
+| Event | What appears on the keyboard | What the recorder and editor do | Feedback |
+| --- | --- | --- | --- |
+| Ready to type | Letters and a left-side voice control | No phrase is being retained. An explicitly activated iPhone keyboard session can keep its audio engine warm between phrases. | Silent. A pressed letter can show an enlarged preview. |
+| Tap voice | Keep keys in place during startup. Indicate that the command is pending. | Check permission and model or provider availability. Associate the request with a fresh phrase ID. Cold iPhone sessions may require opening Vyrra. | One opening cue before audio is retained. It acknowledges an accepted start request. |
+| Recorder ready | Crossfade to a fixed-height panel. Show cancel on the left, finish on the right, and a live waveform with “Listening” underneath. | iPhone waits for the app’s listening payload. Android waits for the matching ready or speech-began callback. | Haptic feedback where enabled. Each loudness change is silent. |
+| Speech or silence | Bars follow recent microphone levels. Use a stationary shape with Reduce Motion. | The iPhone extension reads one quantized amplitude from its private App Group, at most 12 times per second. Readings expire after 350 ms. Android interpolates recognizer loudness at display cadence and decays when updates stop. | Silent. |
+| Finish, or Android end of speech | Keep the panel in place, stop the live wave and show a short processing caption. Disable duplicate finish or cancel actions. | Stop retaining microphone input and finalize the same phrase. Android gives the provider a bounded time to deliver a final result. | One lower closing cue after capture ends. Processing and insertion add no second chime. |
+| Cancel while listening | Return to typing. On iPhone the action remains pending until the recorder acknowledges it. | Discard the active phrase. Later callbacks cannot insert it in a new editor. | One closing cue when an active capture is discarded. |
+| Text arrives | Restore the keys. | iPhone claims a result before automatic insertion and can offer manual insertion for an unclaimed result. Android accepts a final result once per token in the active editor. If that editor rejects it, Android attempts a clipboard fallback marked sensitive and reports its outcome. | Silent. Closing indicates microphone state, independent of transcript success. |
+| Denial, missing model, empty result or interruption | Show recovery guidance. A rejected iPhone finish re-enables the controls. | Permission and provider checks can reject before a cue. A late device-open failure can follow the acknowledgment. Android invalidates the session on editor changes and limits startup to 8 s and result processing to 15 s. iPhone rejects stale shared-session commands and reconciles their acknowledgments. | No success cue. An already active Android capture can still play the closing cue. |
+| Pause on iPhone | A still pause mark and “Paused” replace the waveform. | The app owns pause and resume. | The keyboard does not replay the open cue on a refresh. |
+| Settings preview | Show the selected sound by name. | Play opening and closing samples locally. Off suppresses auditory cues. iPhone preserves an existing mute preference. | Intentional audition only. |
+
+iPhone animates the surface change for 280 ms. Android’s outgoing surface fades over 155 ms and the incoming surface settles over 205 ms. Both use the original keyboard height and hide the inactive surface from accessibility. Android’s letter preview stays inside the keyboard edges and releases exactly one character through the native button. Password fields and touch exploration suppress its enlarged preview.
+
+The public storefront, the uploaded binary and the development source each have their own release state. A country listing establishes availability there. Language recognition also depends on the installed speech model, device and language settings.
+
+## Pixel keyboard appearance
+
+Open **Keyboard appearance** in the Android app or tap the sliders above the keys. The preview updates as you drag. Choose System, Serif, Mono or Narrow, then set letter size from 16–30 sp, row height from 48–64 dp and key spacing from 1–4 dp. System follows device colors and appearance. Light and Dark are explicit overrides. Reset restores the system typeface, 23 sp letters, 52 dp rows and 2 dp spacing. Preferences stay on the device.
+
+The home row is inset by half a key. The top row shows the long-press number shortcuts, and the enter key follows the action requested by the editor. Letter keys keep their full touch area between the visible keycaps. Wide glyphs fit within their available width. In a short landscape or split window, row height adapts to leave the editor visible. Opening appearance from a keyboard gives Back a direct path to the same editor.
