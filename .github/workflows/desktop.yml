@@ -43,13 +43,19 @@ jobs:
       - name: Check the packaged speech engine uses the x86-64 baseline
         shell: python {0}
         run: |
-          import pathlib, re
+          import pathlib, re, sys
           build = pathlib.Path('apps/desktop/src-tauri/target/release/build')
           caches = list(build.glob('whisper-rs-sys-*/out/build/CMakeCache.txt'))
           if not caches:
               raise SystemExit('Missing speech engine build configuration')
           for cache in caches:
-              flags = dict(re.findall(r'^GGML_(\w+):BOOL=(\w+)$', cache.read_text(encoding='utf-8'), re.M))
+              config = cache.read_text(encoding='utf-8')
+              if sys.platform == 'win32':
+                  for lang in ('C', 'CXX'):
+                      flags = re.search(rf'^CMAKE_{lang}_FLAGS_RELEASE:STRING=(.*)$', config, re.M)
+                      if not flags or not re.search(r'(?:^|\s)[/-]O(?:2|x)(?:\s|$)', flags[1]):
+                          raise SystemExit(f'{cache}: missing MSVC Release optimization for {lang}')
+              flags = dict(re.findall(r'^GGML_(\w+):BOOL=(\w+)$', config, re.M))
               if flags.get('LLAMAFILE') != 'ON':
                   raise SystemExit('Missing runtime-selected speech matrix kernel')
               for feature in 'NATIVE SSE42 AVX AVX2 FMA F16C BMI2 AVX_VNNI AVX512 AVX512_VBMI AVX512_VNNI AVX512_BF16 AMX_TILE AMX_INT8 AMX_BF16'.split():

@@ -1,6 +1,16 @@
 # Distributed binaries must work even when built on a newer CPU than the user's.
 string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" vyrra_processor)
 if(vyrra_processor MATCHES "^(amd64|x86_64|x64)$")
+    if(MSVC)
+        # cmake-rs can replace Visual Studio's Release flags with CRT flags alone.
+        # Restore Release optimization without changing the selected C/C++ runtime.
+        foreach(lang C CXX)
+            set(release_flags "CMAKE_${lang}_FLAGS_RELEASE")
+            if(NOT "${${release_flags}}" MATCHES "(^|[ \t])[-/]O[12dxts]([ \t]|$)")
+                set(${release_flags} "${${release_flags}} /O2 /DNDEBUG" CACHE STRING "MSVC Release flags" FORCE)
+            endif()
+        endforeach()
+    endif()
     foreach(feature NATIVE SSE42 AVX AVX2 FMA F16C BMI2 AVX_VNNI AVX512
                     AVX512_VBMI AVX512_VNNI AVX512_BF16 AMX_TILE AMX_INT8 AMX_BF16)
         set(GGML_${feature} OFF CACHE BOOL "Build for the x86-64 baseline" FORCE)

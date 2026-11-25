@@ -1,6 +1,6 @@
 [package]
 name = "vyrra-desktop"
-version = "0.1.1"
+version = "0.1.2"
 description = "Vyrra Desktop native application shell"
 authors = ["Runner Concepts"]
 homepage = "https://vyrra.ai"
