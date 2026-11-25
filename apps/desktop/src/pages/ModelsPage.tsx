@@ -17,7 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { QuietIcon } from "../components/QuietIcon";
-import { Button, ShortcutHint } from "../components/ui";
+import { Button, ShortcutButton } from "../components/ui";
 import { message } from "../lib/dictation";
 import { isNativeDesktop } from "../lib/native";
 import {
@@ -380,16 +380,14 @@ export function ModelsPage() {
             <QuietIcon label="Close search" icon={X} onClick={closeFind} />
           </div>
         ) : (
-          <button
+          <ShortcutButton
             ref={findButton}
-            className="vyrra-button model-find"
-            type="button"
-            aria-keyshortcuts="/"
+            className="model-find"
+            shortcut="/"
             onClick={() => setFinding(true)}
           >
-            <Search size={14} aria-hidden="true" />
-            Find<ShortcutHint>/</ShortcutHint>
-          </button>
+            Find
+          </ShortcutButton>
         )}
       </header>
       {!native && (
