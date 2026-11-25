@@ -43,6 +43,7 @@ try {
   const start = page.getByRole("button", { name: "Start dictation" });
   await expect(start).toBeEnabled({ timeout: 240000 });
   console.log("The packaged app downloaded and prepared its speech model.");
+  await capture("04-ready.png");
   await page.getByRole("button", { name: "More audio options" }).click();
   await page.getByRole("button", { name: "Transcribe WAV" }).click();
   execFileSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-File", chooseFile, audio], { stdio: "inherit", timeout: 45000 });
