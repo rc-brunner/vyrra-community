@@ -74,9 +74,18 @@ jobs:
           if ($LASTEXITCODE) { throw 'The release integration test could not be compiled.' }
           $binary = $messages | ForEach-Object { $_ | ConvertFrom-Json } | Where-Object { $_.target.name -eq 'vyrra_desktop_lib' -and $_.executable } | Select-Object -Last 1 -ExpandProperty executable
           if (-not $binary) { throw 'The release test executable was not found.' }
-          $case = Start-Process $binary -ArgumentList '--ignored','--exact','dictation::tests::desktop_decodes_known_speech_offline' -NoNewWindow -PassThru
-          if (-not $case.WaitForExit(90000)) { $case.Kill(); throw 'Speech recognition exceeded 90 seconds for the short sentence.' }
-          if ($case.ExitCode -ne 0) { throw 'The release engine did not produce the expected transcript.' }
+          @'
+          import subprocess
+          import sys
+
+          binary = sys.argv[1]
+          case = 'dictation::tests::desktop_decodes_known_speech_offline'
+          listing = subprocess.check_output([binary, '--ignored', '--list'], text=True)
+          if f'{case}: test' not in listing.splitlines():
+              raise SystemExit('The release speech test was not found.')
+          subprocess.run([binary, '--ignored', '--exact', case, '--nocapture'], timeout=90, check=True)
+          '@ | python - $binary
+          if ($LASTEXITCODE -ne 0) { throw 'The release speech test failed.' }
       - name: Install Linux package on a clean Ubuntu image
         if: runner.os == 'Linux'
         run: |
