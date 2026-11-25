@@ -44,21 +44,13 @@ jobs:
           [[ ${#linux_packages[@]} == 1 && ${#windows_packages[@]} == 1 ]]
           cp "${linux_packages[0]}" packages/Vyrra-Linux-x86_64.deb
           cp "${windows_packages[0]}" packages/Vyrra-Windows-x64.exe
-          jq --arg repo "$GITHUB_REPOSITORY" '{
-            buildDefinition: {
-              buildType: "https://actions.github.io/buildtypes/workflow/v1",
-              externalParameters: {workflow: {repository: ("https://github.com/" + $repo),
-                ref: "refs/heads/main", path: .path}},
-              internalParameters: {},
-              resolvedDependencies: [{uri: ("git+https://github.com/" + $repo + "@refs/heads/main"),
-                digest: {gitCommit: .head_sha}}]
-            },
-            runDetails: {builder: {id: ("https://github.com/" + $repo + "/" + .path + "@refs/heads/main")},
-              metadata: {invocationId: .html_url}}
-          }' "$RUNNER_TEMP/build.json" > provenance.json
-      - name: Sign package provenance with the repository identity
+          jq '{repository: .head_repository.full_name, workflow: .path,
+            commit: .head_sha, run: .html_url, conclusion: .conclusion,
+            platforms: ["ubuntu-24.04 amd64", "windows-2022 x64"]}' \
+            "$RUNNER_TEMP/build.json" > build-verification.json
+      - name: Sign the independent verification of the native build
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6
         with:
           subject-path: packages/*
-          predicate-type: https://slsa.dev/provenance/v1
-          predicate-path: provenance.json
+          predicate-type: https://github.com/rc-brunner/vyrra-community/attestations/desktop-verification/v1
+          predicate-path: build-verification.json
