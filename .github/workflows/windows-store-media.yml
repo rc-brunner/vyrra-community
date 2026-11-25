@@ -1,0 +1,75 @@
+name: Capture the packaged Windows Store listing
+on:
+  push:
+    branches: [release/windows-store-media]
+    paths:
+      - .github/workflows/windows-store-media.yml
+      - apps/desktop/store-preview/**
+permissions:
+  contents: read
+  actions: read
+  attestations: read
+
+jobs:
+  screenshots:
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .node-version
+      - name: Install the renderer test tools from the project lockfile
+        run: |
+          npm install --global pnpm@10.14.0
+          pnpm install --frozen-lockfile --ignore-scripts
+      - name: Synthesize a non-personal sample WAV on the test machine
+        shell: powershell
+        run: |
+          Add-Type -AssemblyName System.Speech
+          $speech = [System.Speech.Synthesis.SpeechSynthesizer]::new()
+          try {
+            $speech.Rate = -1
+            $speech.SetOutputToWaveFile("$PWD/apps/desktop/store-preview/blue-notebook.wav")
+            $speech.Speak('I left the blue notebook on the kitchen table. Could you bring it to the design review tomorrow?')
+          } finally {
+            $speech.Dispose()
+          }
+      - name: Open the verified Windows release in an empty runner profile
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $run = '45528243673'
+          $repository = $env:GITHUB_REPOSITORY
+          gh run download $run --repo $repository --name vyrra-Windows-x64 --dir package
+          if ($LASTEXITCODE) { throw 'Installer download failed.' }
+          $setup = @(Get-ChildItem package -Filter '*_x64-setup.exe' -File)
+          if ($setup.Count -ne 1) { throw 'Expected one x64 installer.' }
+          $proof = gh attestation verify $setup[0].FullName --repo $repository --predicate-type "https://github.com/$repository/attestations/desktop-verification/v1" --signer-workflow "$repository/.github/workflows/desktop-provenance.yml" --format json
+          if ($LASTEXITCODE) { throw 'Installer attestation failed.' }
+          $verified = ($proof | ConvertFrom-Json) | Where-Object { $_.verificationResult.statement.predicate.run -eq "https://github.com/$repository/actions/runs/$run" }
+          if (-not $verified) { throw 'The installer does not belong to the approved native run.' }
+          $install = Join-Path $env:RUNNER_TEMP 'VyrraStorePreview'
+          $result = Start-Process $setup[0].FullName -ArgumentList '/S',"/D=$install" -Wait -PassThru
+          if ($result.ExitCode) { throw "Installer returned $($result.ExitCode)." }
+          $app = @(Get-ChildItem $install -Filter '*.exe' -File | Where-Object { $_.BaseName -match '^Vyrra[- ]Desktop$' })
+          if ($app.Count -ne 1) { throw 'Installed application is missing.' }
+          # Only this test process on the disposable runner enables WebView2 inspection.
+          $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS = '--remote-debugging-port=9222 --remote-debugging-address=127.0.0.1'
+          $window = Start-Process $app[0].FullName -PassThru
+          try {
+            node apps/desktop/store-preview/capture.mjs
+            if ($LASTEXITCODE) { throw 'The native app did not complete the Store preview.' }
+          } finally {
+            if (-not $window.HasExited) { Stop-Process -Id $window.Id }
+          }
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: vyrra-windows-store-screenshots
+          path: store-screenshots/*.png
+          if-no-files-found: warn
