@@ -92,7 +92,12 @@ try:
         raise RuntimeError(f"Unexpected public speech sample transcript: {value}")
     print("Decoded the public speech fixture through the installed app's file picker.")
     press("Save to Library")
-    find("Saved on this device.", enabled=False)
+    # GTK exposes the status paragraph as anonymous text. Check the saved entry itself.
+    for _ in range(20):
+        button = find("Save to Library", wait=3, enabled=False)
+        if any(button.getState().contains(state) for state in (pyatspi.STATE_PRESSED, pyatspi.STATE_CHECKED)):
+            break
+        time.sleep(.1)
     press("Library")
     find(lambda label: "country" in label.lower() and "ask" in label.lower(), enabled=False)
     print("Verified the saved native transcript in the Linux library.")
