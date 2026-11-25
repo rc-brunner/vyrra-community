@@ -75,6 +75,11 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
+    "linux": {
+      "deb": {
+        "depends": ["libwebkit2gtk-4.1-0", "libgtk-3-0", "libasound2t64 | libasound2"]
+      }
+    },
     "macOS": {
       "bundleName": "Vyrra Desktop",
       "minimumSystemVersion": "13.0",

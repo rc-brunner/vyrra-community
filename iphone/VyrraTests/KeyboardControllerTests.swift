@@ -251,6 +251,8 @@ final class KeyboardControllerTests: XCTestCase {
 
     func testOnlyActivePhrasesReplaceTheKeysAtTheSameHeight() throws {
         let now = Date()
+        let voiceMark = try XCTUnwrap(UIImage(named: "VyrraMark", in: Bundle(for: KeyboardViewController.self), compatibleWith: nil))
+        let waveStates = ["full-access-off", "no-session", "session-mic-on", "starting", "preparing-voice"]
         let liveSession = KeyboardActivationPayload(id: "keyboard-session", expiresAt: nil, updatedAt: now)
         func phrase(_ state: KeyboardSessionState, result: String? = nil) -> KeyboardSessionPayload {
             KeyboardSessionPayload(
@@ -304,7 +306,13 @@ final class KeyboardControllerTests: XCTestCase {
                     } else {
                         let button = try XCTUnwrap(buttons.first)
                         XCTAssertEqual(button.convert(button.bounds, to: keyboard.view).minX, KeyboardGeometry.horizontalInset, accuracy: 0.01)
-                        XCTAssertTrue(button.configuration?.image?.isSymbolImage == true)
+                        let icon = try XCTUnwrap(button.configuration?.image)
+                        if waveStates.contains(state.name) {
+                            XCTAssertEqual(icon.pngData(), voiceMark.pngData(), state.name)
+                            XCTAssertEqual(icon.size, CGSize(width: 32, height: 32))
+                        } else {
+                            XCTAssertTrue(icon.isSymbolImage, state.name)
+                        }
                     }
                     XCTAssertNil(visibleGuidanceLabel(keyboard))
 

@@ -63,6 +63,7 @@
 		B0B0C0D0E0F0000000000121 /* KeyboardInputPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B0C0D0E0F0000000000220 /* KeyboardInputPolicy.swift */; };
 		B0B0C0D0E0F000000000010B /* KeyboardGeometryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B0C0D0E0F000000000020D /* KeyboardGeometryTests.swift */; };
 		B0B0C0D0E0F0000000000122 /* KeyboardInputPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B0C0D0E0F0000000000221 /* KeyboardInputPolicyTests.swift */; };
+		B0B0C0D0E0F0000000000145 /* Keyboard assets in test resources */ = {isa = PBXBuildFile; fileRef = B0B0C0D0E0F000000000020E /* Assets.xcassets */; };
 		B0B0C0D0E0F000000000010C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B0B0C0D0E0F000000000020E /* Assets.xcassets */; };
 		C1D2E3F4A5B6000000000101 /* VyrraActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B6000000000201 /* VyrraActivityAttributes.swift */; };
 		C1D2E3F4A5B6000000000102 /* VyrraLiveActivityController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F4A5B6000000000202 /* VyrraLiveActivityController.swift */; };
@@ -517,6 +518,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B0B0C0D0E0F0000000000145 /* Keyboard assets in test resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -777,7 +779,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Vyrra/Vyrra.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 31;
+				CURRENT_PROJECT_VERSION = 32;
 				DEVELOPMENT_ASSET_PATHS = "";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Vyrra/Info.plist;
@@ -802,7 +804,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Vyrra/Vyrra.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 31;
+				CURRENT_PROJECT_VERSION = 32;
 				DEVELOPMENT_ASSET_PATHS = "";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Vyrra/Info.plist;
@@ -825,7 +827,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 31;
+				CURRENT_PROJECT_VERSION = 32;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MARKETING_VERSION = 1.0.2;
@@ -844,7 +846,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 31;
+				CURRENT_PROJECT_VERSION = 32;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MARKETING_VERSION = 1.0.2;
@@ -864,7 +866,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = VyrraKeyboard/VyrraKeyboard.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 31;
+				CURRENT_PROJECT_VERSION = 32;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = VyrraKeyboard/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
@@ -893,7 +895,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = VyrraKeyboard/VyrraKeyboard.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 31;
+				CURRENT_PROJECT_VERSION = 32;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = VyrraKeyboard/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
@@ -922,7 +924,7 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 31;
+				CURRENT_PROJECT_VERSION = 32;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = VyrraLiveActivity/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
@@ -950,7 +952,7 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 31;
+				CURRENT_PROJECT_VERSION = 32;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = VyrraLiveActivity/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;

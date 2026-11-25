@@ -7,6 +7,8 @@ class KeyboardViewController: UIInputViewController {
     private let containerStack = UIStackView()
     private let commandBar = UIStackView()
     private let vyrraButton = UIButton(type: .system)
+    private static let voiceMark = UIImage(named: "VyrraMark", in: Bundle(for: KeyboardViewController.self), compatibleWith: nil)
+        ?? UIImage(systemName: "waveform")
     private let dictationPanel = KeyboardDictationPanel()
     private let menuButton = UIButton(type: .system)
     private let keyboardShell = KeyboardTouchRegion()
@@ -191,7 +193,21 @@ class KeyboardViewController: UIInputViewController {
         commandBar.heightAnchor.constraint(equalToConstant: KeyboardGeometry.commandBarHeight).isActive = true
 
         configureIconButton(vyrraButton, size: KeyboardGeometry.primaryControlSize)
-        vyrraButton.configuration?.image = UIImage(systemName: "questionmark.circle")
+        vyrraButton.configuration?.image = Self.voiceMark
+        vyrraButton.configurationUpdateHandler = { button in
+            guard let icon = button.imageView else { return }
+            let pressed = button.isHighlighted && !UIAccessibility.isReduceMotionEnabled
+            let scale = pressed ? CGAffineTransform(scaleX: 0.94, y: 0.94) : .identity
+            guard icon.transform != scale else { return }
+            if UIAccessibility.isReduceMotionEnabled {
+                icon.transform = .identity
+            } else {
+                UIView.animate(withDuration: pressed ? 0.08 : 0.16, delay: 0,
+                    options: [.beginFromCurrentState, .allowUserInteraction, .curveEaseOut]) {
+                    icon.transform = scale
+                }
+            }
+        }
         vyrraButton.accessibilityLabel = "How to start Vyrra dictation"
         vyrraButton.accessibilityHint = "Shows how to start a recording and return to this keyboard."
         vyrraButton.addAction(UIAction { [weak self] _ in
@@ -468,15 +484,15 @@ class KeyboardViewController: UIInputViewController {
     }
 
     private func configureVyrraButton(for state: KeyboardSessionState) {
-        let symbol: String
+        let icon: UIImage?
         vyrraButton.accessibilityValue = primaryAction == .start ? "Microphone on" : nil
         switch primaryAction {
         case .start:
-            symbol = "mic"
+            icon = Self.voiceMark
             vyrraButton.accessibilityLabel = "Start Vyrra dictation"
             vyrraButton.accessibilityHint = "Starts a phrase in your active keyboard session."
         case .quickStart:
-            symbol = hasSharedContainer ? "questionmark" : "lock.fill"
+            icon = Self.voiceMark
             vyrraButton.accessibilityLabel = !hasSharedContainer
                 ? "Set up Vyrra keyboard"
                 : "How to start Vyrra dictation"
@@ -484,19 +500,19 @@ class KeyboardViewController: UIInputViewController {
                 ? "Shows how to start a recording and return to this keyboard."
                 : "Opens Settings. Full Access enables local session status and insertion."
         case .attention:
-            symbol = "exclamationmark"
+            icon = UIImage(systemName: "exclamationmark")
             vyrraButton.accessibilityLabel = "Vyrra needs attention"
             vyrraButton.accessibilityHint = "Open Vyrra from the Home Screen to resolve the last dictation."
         case .finish:
-            symbol = "checkmark"
+            icon = UIImage(systemName: "checkmark")
             vyrraButton.accessibilityLabel = "Finish Vyrra dictation"
             vyrraButton.accessibilityHint = "Finishes this recording and prepares the text."
         case .insertResult:
-            symbol = "arrow.down.doc"
+            icon = UIImage(systemName: "arrow.down.doc")
             vyrraButton.accessibilityLabel = "Insert Vyrra result"
             vyrraButton.accessibilityHint = "Inserts the completed dictation at the cursor."
         case .wait:
-            symbol = "ellipsis"
+            icon = state == .opening || state == .warming ? Self.voiceMark : UIImage(systemName: "ellipsis")
             switch state {
             case .opening:
                 vyrraButton.accessibilityLabel = "Vyrra is starting dictation"
@@ -510,8 +526,8 @@ class KeyboardViewController: UIInputViewController {
             }
         }
 
-        UIView.performWithoutAnimation {
-            vyrraButton.configuration?.image = UIImage(systemName: symbol)
+        if vyrraButton.configuration?.image != icon {
+            UIView.performWithoutAnimation { vyrraButton.configuration?.image = icon }
         }
     }
 
