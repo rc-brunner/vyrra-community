@@ -6,7 +6,7 @@ In the desktop source with the **Models** sidebar item, users can download, impo
 
 The default desktop control is 32 × 32 pixels for an icon or 32 pixels high for a labeled button. Use a 16-pixel outline icon, an 8-pixel control radius and a visible 2-pixel focus ring. The 52-pixel model row has a 28-pixel glyph, model name, file size and a right-aligned primary action. Reserve the secondary action’s space even when hidden. On touch, controls grow to 44 pixels and rows to at least 56 pixels. Text can wrap and rows can grow at larger font sizes.
 
-Use the app’s Inter and system sans-serif stack. Page headings are 24/30 pixels, model names are 13/18, metadata is 12/16, and keycaps are 11/15. File sizes use decimal units. Use tabular numerals for transfer progress and elapsed time. Selection has a check and the words “In use” in both themes.
+Use the app’s Inter and system sans-serif stack. At the default text size, page headings are 24/30 pixels, model names are 13/18, metadata is 12/16, and keycaps are 11/15. Line heights scale with the text. The catalog fits up to two columns and switches to one when two 17-rem rows would crowd the controls. File sizes use decimal units. Use tabular numerals for transfer progress and elapsed time. Selection has a check and the words “In use” in both themes.
 
 | Interaction | Response |
 | --- | --- |

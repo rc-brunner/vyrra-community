@@ -180,7 +180,7 @@
 .vyrra-row-actions .lucide-pin { rotate: 34deg; }
 
 .vyrra-tip, .sound-menu { border: 1px solid var(--pvw-line); background: var(--pvw-surface-raised); color: var(--pvw-ink); box-shadow: 0 4px 16px #0002; z-index: 50; animation: quiet-appear var(--vyrra-enter) var(--vyrra-ease-out) both; }
-.vyrra-tip { position: fixed; pointer-events: none; border-radius: 6px; padding: 4px 8px; font-size: 12px; line-height: 18px; max-width: min(240px, calc(100vw - 16px)); }
+.vyrra-tip { position: fixed; pointer-events: none; border-radius: 6px; padding: 4px 8px; font-size: var(--vyrra-meta); line-height: 1.5; max-width: min(240px, calc(100vw - 16px)); }
 .sound-trigger { display: inline-flex; align-items: center; gap: .4rem; padding: .45rem .6rem; border-radius: .5rem; font-size: .875rem; color: var(--pvw-ink); }
 .sound-trigger:hover, .sound-trigger[aria-expanded=true], .sound-menu [data-active=true] { background: var(--pvw-surface-strong); }
 .sound-trigger svg { transition: transform var(--vyrra-enter) var(--vyrra-ease-out); }.sound-trigger[aria-expanded=true] svg { transform: rotate(180deg); }
@@ -216,10 +216,10 @@
 }
 .vyrra-page-title { font-size: var(--vyrra-title); font-weight: 620; line-height: 1.25; letter-spacing: -.035em; }
 .vyrra-button, .vyrra-nav, .model-search { min-height: var(--vyrra-control); border-radius: var(--vyrra-radius); font-size: var(--vyrra-label); }
-.vyrra-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 4px 10px; line-height: 20px; transition: background-color var(--vyrra-feedback) var(--vyrra-ease-out), color var(--vyrra-feedback) var(--vyrra-ease-out); }
+.vyrra-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 4px 10px; line-height: 1.54; transition: background-color var(--vyrra-feedback) var(--vyrra-ease-out), color var(--vyrra-feedback) var(--vyrra-ease-out); }
 .vyrra-nav { transition: background-color var(--vyrra-feedback) var(--vyrra-ease-out); }
 .vyrra-button svg { flex: none; }
-.vyrra-kbd { display: inline-flex; align-items: center; justify-content: center; gap: 2px; margin-inline-start: 3px; min-width: 16px; padding: 0 4px; border: 1px solid color-mix(in srgb,currentColor 24%,transparent); border-radius: 4px; font: 500 .6875rem/15px ui-monospace,monospace; letter-spacing: 0; white-space: nowrap; }
+.vyrra-kbd { display: inline-flex; align-items: center; justify-content: center; gap: 2px; margin-inline-start: 3px; min-width: 16px; padding: 0 4px; border: 1px solid color-mix(in srgb,currentColor 24%,transparent); border-radius: 4px; font: 500 .6875rem/1.36 ui-monospace,monospace; letter-spacing: 0; white-space: nowrap; }
 .model-page { width: 100%; max-width: 980px; margin-inline: auto; }
 .model-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding-block-end: 17px; border-bottom: 1px solid var(--pvw-line); }
 .model-header p, .model-note, .model-error { margin-top: 5px; font-size: var(--vyrra-label); line-height: 1.5; color: var(--pvw-ink-soft); }
@@ -230,16 +230,19 @@
 .model-search input { background: transparent; width: 9rem; max-width: 100%; outline: none; color: var(--pvw-ink); }
 .model-search:focus-within, .model-find:focus-visible, .model-sources summary:focus-visible { outline: 2px solid var(--pvw-focus); outline-offset: 2px; }
 .model-group { margin-top: 22px; }
-.model-group h2 { display: flex; align-items: center; gap: 6px; color: var(--pvw-ink-soft); font-size: var(--vyrra-meta); font-weight: 600; line-height: 18px; margin-bottom: 7px; }
-.model-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%,17rem), 1fr)); gap: 6px 8px; }
-.model-group:last-of-type .model-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%,17rem),1fr)); }
+.model-group h2 { display: flex; align-items: center; gap: 6px; color: var(--pvw-ink-soft); font-size: var(--vyrra-meta); font-weight: 600; line-height: 1.5; margin-bottom: 7px; }
+.model-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, max(17rem, calc((100% - 8px) / 2))), 1fr));
+  gap: 6px 8px;
+}
 .model-row { display: flex; align-items: center; gap: 9px; min-width: 0; min-height: var(--vyrra-row); padding: 5px 6px 5px 10px; border: 1px solid var(--pvw-line); border-radius: 10px; background: var(--pvw-surface); transition: background-color var(--vyrra-feedback) var(--vyrra-ease-out), border-color var(--vyrra-feedback) var(--vyrra-ease-out); }
 .model-row[data-active=true] { background: var(--pvw-accent-soft); border-color: color-mix(in srgb, var(--pvw-ink) 33%, var(--pvw-line)); }
 .model-glyph { display: grid; flex: none; place-items: center; width: 28px; height: 28px; border-radius: 7px; background: var(--pvw-surface-strong); color: var(--pvw-ink-soft); }
 .model-row[data-active=true] .model-glyph { background: var(--pvw-ink); color: var(--pvw-canvas); }
-.model-copy { display: grid; align-content: center; min-width: 0; flex: 1; }
-.model-name { color: var(--pvw-ink); font-size: var(--vyrra-label); font-weight: 600; line-height: 18px; }
-.model-meta { color: var(--pvw-ink-soft); font-size: var(--vyrra-meta); line-height: 16px; font-variant-numeric: tabular-nums; }
+.model-copy { display: grid; align-content: center; min-width: 0; flex: 1; overflow-wrap: anywhere; }
+.model-name { color: var(--pvw-ink); font-size: var(--vyrra-label); font-weight: 600; line-height: 1.385; }
+.model-meta { color: var(--pvw-ink-soft); font-size: var(--vyrra-meta); line-height: 1.334; font-variant-numeric: tabular-nums; }
 .model-controls { display: flex; align-items: center; flex: none; }
 .model-primary, .model-secondary { display: inline-flex; }
 .model-primary .vyrra-icon { color: var(--pvw-ink); }
@@ -255,9 +258,6 @@
 .model-sources > div { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; padding-inline-start: 20px; }
 .model-sources a:hover { text-decoration: underline; }
 .vyrra-wave-bar { transition: height var(--vyrra-meter) var(--vyrra-ease-out), opacity var(--vyrra-feedback) var(--vyrra-ease-out); }
-@media(min-width: 768px) {
-  .model-grid, .model-group:last-of-type .model-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
-}
 @media(hover:hover) and (pointer:fine) {
   .model-secondary:not([data-busy=true]) { opacity: 0; transition: opacity var(--vyrra-feedback) var(--vyrra-ease-out); pointer-events: none; }
   .model-row:is(:hover,:focus-within) .model-secondary { opacity: 1; pointer-events: auto; }

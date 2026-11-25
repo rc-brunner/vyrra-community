@@ -158,6 +158,30 @@ test("Find shortcut, text input and Escape restore keyboard focus", async ({
   ).toBeVisible();
 });
 
+test("model names and sizes stay separate with enlarged text in narrow windows", async ({ page }) => {
+  await catalog(page);
+  await page.addStyleTag({ content: "html { font-size: 200%; }" });
+
+  for (const width of [320, 390, 780]) {
+    await page.setViewportSize({ width, height: 780 });
+    const overlaps = await page.locator(".model-row").evaluateAll((rows) => {
+      function textBounds(element: Element) {
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        return range.getBoundingClientRect();
+      }
+      return rows.filter((row) => {
+        const name = textBounds(row.querySelector(".model-name")!);
+        const size = textBounds(row.querySelector(".model-meta")!);
+        const actions = row.querySelector(".model-controls")!.getBoundingClientRect();
+        return name.bottom > size.top + 1 || Math.max(name.right, size.right) > actions.left + 1;
+      }).map((row) => row.textContent);
+    });
+    expect(overlaps).toEqual([]);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+  }
+});
+
 for (const scheme of ["light", "dark"] as const) {
   test(`catalog contrast and keyboard semantics in ${scheme}`, async ({
     page,
