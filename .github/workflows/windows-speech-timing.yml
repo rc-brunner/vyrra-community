@@ -6,6 +6,32 @@ on:
 permissions:
   contents: read
 jobs:
+  linux:
+    name: Linux native speech and pre-AVX fallback
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Verify speech on the host and the fallback on a CPU without AVX
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -yqq espeak-ng qemu-user
+          curl -fsSL --retry 3 https://static.crates.io/crates/whisper-rs-sys/whisper-rs-sys-0.15.0.crate -o source.tar.gz
+          digest=$(python3 -c "import tomllib;print(next(x['checksum'] for x in tomllib.load(open('apps/desktop/src-tauri/Cargo.lock','rb'))['package'] if x['name']=='whisper-rs-sys'))")
+          echo "$digest  source.tar.gz" | sha256sum -c -
+          tar xf source.tar.gz
+          cmake -S tools/windows-speech-timing -B native -DCMAKE_BUILD_TYPE=Release "-DCMAKE_PROJECT_ggml_INCLUDE=$PWD/scripts/portable-ggml.cmake" -DGGML_OPENMP=OFF -DBUILD_SHARED_LIBS=OFF -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF
+          cmake --build native --target speech-timing matrix-check --parallel 4
+          native/matrix-check
+          qemu-x86_64 -cpu Nehalem native/matrix-check
+          curl -fsSL --retry 3 'https://huggingface.co/ggerganov/whisper.cpp/resolve/5359861c739e955e79d9a303bcbc70fb988958b1/ggml-base.bin' -o model.bin
+          echo '60ed5bc3dd14eea856493d334349b405782ddcaf0028d4b5df4088345fba2efe  model.bin' | sha256sum -c -
+          espeak-ng -v en-us -s 144 -w speech.wav 'I left the blue notebook on the kitchen table. Could you bring it to the design review tomorrow?'
+          ffmpeg -v error -i speech.wav -ac 1 -ar 16000 -f f32le speech.f32
+          native/speech-timing model.bin speech.f32
   timing:
     strategy:
       fail-fast: false
