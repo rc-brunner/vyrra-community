@@ -13,7 +13,10 @@ int main(int argc, char **argv) {
     file.seekg(0);
     std::vector<float> samples(length / sizeof(float));
     if (!file.read(reinterpret_cast<char *>(samples.data()), length)) return 3;
-    auto *ctx = whisper_init_from_file_with_params(argv[1], whisper_context_default_params());
+    auto config = whisper_context_default_params();
+    config.use_gpu = false;
+    config.flash_attn = false;
+    auto *ctx = whisper_init_from_file_with_params(argv[1], config);
     if (!ctx) return 4;
     auto params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
     params.n_threads = 4;

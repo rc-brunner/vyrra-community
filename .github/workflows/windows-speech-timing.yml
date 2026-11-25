@@ -2,7 +2,7 @@ name: Measure native x64 speech recognition
 on:
   push:
     branches: [release/windows-store-media]
-    paths: ['.github/workflows/windows-speech-timing.yml', 'tools/windows-speech-timing/**']
+    paths: ['.github/workflows/windows-speech-timing.yml', 'tools/windows-speech-timing/**', 'scripts/portable-ggml.cmake', 'scripts/dispatch-sgemm.cpp']
 permissions:
   contents: read
 jobs:
@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        avx2: ['OFF', 'ON']
+        repeats: [1, 2]
     runs-on: windows-2022
     timeout-minutes: 14
     steps:
@@ -28,8 +28,6 @@ jobs:
           if ((Get-FileHash model.bin).Hash -ne '60ed5bc3dd14eea856493d334349b405782ddcaf0028d4b5df4088345fba2efe') { throw 'Speech model verification failed.' }
       - name: Prepare the six-second fixture and measure the native engine
         shell: powershell
-        env:
-          AVX2: ${{ matrix.avx2 }}
         run: |
           $ErrorActionPreference = 'Stop'
           Get-CimInstance Win32_Processor | Select-Object -ExpandProperty Name
@@ -41,7 +39,8 @@ jobs:
             $speech.Speak('I left the blue notebook on the kitchen table. Could you bring it to the design review tomorrow?')
           } finally { $speech.Dispose() }
           python -c "import struct,wave; w=wave.open('notebook.wav'); assert w.getframerate()==16000 and w.getnchannels()==1; a=[s[0]/32768 for s in struct.iter_unpack('<h',w.readframes(w.getnframes()))]; open('speech.f32','wb').write(struct.pack('<'+str(len(a))+'f',*a));print('Sample',len(a)/16000,'seconds')"
-          cmake -S tools/windows-speech-timing -B native -A x64 -DGGML_NATIVE=OFF -DGGML_SSE42=OFF -DGGML_AVX=OFF -DGGML_AVX2=$env:AVX2 -DGGML_AVX512=OFF -DGGML_BMI2=OFF -DGGML_FMA=OFF -DGGML_F16C=OFF -DGGML_OPENMP=OFF -DBUILD_SHARED_LIBS=OFF -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF
+          $hook = (Resolve-Path scripts/portable-ggml.cmake).Path.Replace('\','/')
+          cmake -S tools/windows-speech-timing -B native -A x64 "-DCMAKE_PROJECT_ggml_INCLUDE=$hook" -DGGML_OPENMP=OFF -DBUILD_SHARED_LIBS=OFF -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           cmake --build native --config Release --target speech-timing --parallel 4
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
