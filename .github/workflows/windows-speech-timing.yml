@@ -8,17 +8,21 @@ permissions:
 jobs:
   linux:
     name: Linux native speech and pre-AVX fallback
+    needs: timing
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: synthetic-speech-fixture
       - name: Verify speech on the host and the fallback on a CPU without AVX
         run: |
           set -euo pipefail
           sudo apt-get update -qq
-          sudo apt-get install -yqq espeak-ng ffmpeg qemu-user
+          sudo apt-get install -yqq qemu-user
           curl -fsSL --retry 3 https://static.crates.io/crates/whisper-rs-sys/whisper-rs-sys-0.15.0.crate -o source.tar.gz
           digest=$(python3 -c "import tomllib;print(next(x['checksum'] for x in tomllib.load(open('apps/desktop/src-tauri/Cargo.lock','rb'))['package'] if x['name']=='whisper-rs-sys'))")
           echo "$digest  source.tar.gz" | sha256sum -c -
@@ -29,8 +33,6 @@ jobs:
           qemu-x86_64 -cpu Nehalem native/matrix-check
           curl -fsSL --retry 3 'https://huggingface.co/ggerganov/whisper.cpp/resolve/5359861c739e955e79d9a303bcbc70fb988958b1/ggml-base.bin' -o model.bin
           echo '60ed5bc3dd14eea856493d334349b405782ddcaf0028d4b5df4088345fba2efe  model.bin' | sha256sum -c -
-          espeak-ng -v en-us -s 144 -w speech.wav 'I left the blue notebook on the kitchen table. Could you bring it to the design review tomorrow?'
-          ffmpeg -v error -i speech.wav -ac 1 -ar 16000 -f f32le speech.f32
           native/speech-timing model.bin speech.f32
   timing:
     strategy:
@@ -73,3 +75,9 @@ jobs:
           $program = Get-ChildItem native -Recurse -Filter speech-timing.exe | Select-Object -First 1
           & $program.FullName model.bin speech.f32
           exit $LASTEXITCODE
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: matrix.repeats == 1
+        with:
+          name: synthetic-speech-fixture
+          path: speech.f32
+          if-no-files-found: error
