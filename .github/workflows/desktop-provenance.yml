@@ -46,7 +46,7 @@ jobs:
           cp "${windows_packages[0]}" packages/Vyrra-Windows-x64.exe
           jq --arg repo "$GITHUB_REPOSITORY" '{
             buildDefinition: {
-              buildType: "https://github.com/actions/runner",
+              buildType: "https://actions.github.io/buildtypes/workflow/v1",
               externalParameters: {workflow: {repository: ("https://github.com/" + $repo),
                 ref: "refs/heads/main", path: .path}},
               internalParameters: {},
