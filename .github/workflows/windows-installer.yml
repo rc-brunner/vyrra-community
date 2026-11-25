@@ -6,6 +6,15 @@ on:
         description: Desktop checks run with verified packages
         required: true
         type: string
+      store_identity:
+        description: Package/Identity/Name from Partner Center (leave empty for a packaging test)
+        type: string
+      store_publisher:
+        description: Package/Identity/Publisher from Partner Center
+        type: string
+      publisher_display_name:
+        description: Package/Properties/PublisherDisplayName from Partner Center
+        type: string
 permissions:
   actions: read
   attestations: read
@@ -35,6 +44,7 @@ jobs:
           $nativeRun = "https://github.com/$env:GITHUB_REPOSITORY/actions/runs/$env:BUILD_RUN"
           $verified = ($proof | ConvertFrom-Json) | Where-Object { $_.verificationResult.statement.predicate.run -eq $nativeRun }
           if (-not $verified) { throw 'The attestation does not identify the selected build.' }
+          "NATIVE_COMMIT=$($verified[0].verificationResult.statement.predicate.commit)" >> $env:GITHUB_ENV
 
       - name: Install and open the packaged application
         shell: pwsh
@@ -65,3 +75,34 @@ jobs:
           } finally {
             if (-not $process.HasExited) { Stop-Process -Id $process.Id }
           }
+
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          path: tools
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.NATIVE_COMMIT }}
+          path: source
+          sparse-checkout: apps/desktop/src-tauri
+          persist-credentials: false
+      - name: Package the verified application for Microsoft Store
+        shell: pwsh
+        env:
+          STORE_IDENTITY: ${{ inputs.store_identity }}
+          STORE_PUBLISHER: ${{ inputs.store_publisher }}
+          STORE_DISPLAY_NAME: ${{ inputs.publisher_display_name }}
+        run: |
+          $identity = @($env:STORE_IDENTITY, $env:STORE_PUBLISHER, $env:STORE_DISPLAY_NAME) | Where-Object { $_ }
+          if ($identity.Count -eq 0) {
+            $identity = @('Vyrra.PackagingTest', 'CN=Vyrra Packaging Test', 'Vyrra Packaging Test')
+          } elseif ($identity.Count -ne 3) {
+            throw 'Supply all three identity fields from the same Partner Center product.'
+          }
+          ./tools/scripts/package-windows-store.ps1 -InstalledDirectory "$env:RUNNER_TEMP/vyrra-installed" -ProjectDirectory ./source/apps/desktop/src-tauri -IdentityName $identity[0] -Publisher $identity[1] -PublisherDisplayName $identity[2] -OutputFile "$env:RUNNER_TEMP/Vyrra-Windows-x64.msix"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: inputs.store_identity != '' && inputs.store_publisher != '' && inputs.publisher_display_name != ''
+        with:
+          name: vyrra-Windows-Store-x64
+          path: ${{ runner.temp }}/Vyrra-Windows-x64.msix
+          if-no-files-found: error
