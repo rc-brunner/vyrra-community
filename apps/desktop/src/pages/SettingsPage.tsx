@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import {
   Check,
   Keyboard,
+  CalendarDays,
   Mic,
   Palette,
   Scissors,
@@ -11,6 +12,7 @@ import {
 
 import { RecorderPill } from "../components/RecorderPill";
 import { DictationShortcutSettings } from "../components/DictationShortcutSettings";
+import { MeetingProfile } from "../components/MeetingProfile";
 import { DictationPreferences } from "../components/DictationPreferences";
 import { ShortcutSettingsSection } from "../components/ShortcutSettingsSection";
 import {
@@ -36,7 +38,7 @@ import {
   type WaveformVariant,
 } from "../lib/waveform";
 
-type SettingsSection = "shortcuts" | "dictation" | "appearance" | "privacy";
+type SettingsSection = "shortcuts" | "dictation" | "meetings" | "appearance" | "privacy";
 
 const SETTINGS_SECTIONS = [
   {
@@ -48,6 +50,9 @@ const SETTINGS_SECTIONS = [
     id: "dictation",
     label: "Dictation",
     icon: Mic,
+  },
+  {
+    id: "meetings", label: "Meetings", icon: CalendarDays,
   },
   {
     id: "appearance",
@@ -236,6 +241,7 @@ export function SettingsPage() {
       <div className="min-w-0">
         {section === "shortcuts" && <><ShortcutSettingsSection /><DictationShortcutSettings /></>}
         {section === "dictation" && <DictationPreferences />}
+        {section === "meetings" && <MeetingProfile />}
 
         {section === "appearance" && (
           <div className="space-y-9">

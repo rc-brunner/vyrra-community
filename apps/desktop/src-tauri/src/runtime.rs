@@ -24,7 +24,11 @@ pub fn runtime_status() -> RuntimeStatus {
         },
         native_shortcuts_available: cfg!(target_os = "macos"),
         quick_clip_available: cfg!(target_os = "macos"),
-        audio_capture_available: cfg!(any(target_os = "macos", target_os = "windows", target_os = "linux")),
+        audio_capture_available: cfg!(any(
+            target_os = "macos",
+            target_os = "windows",
+            target_os = "linux"
+        )),
     }
 }
 
@@ -39,6 +43,13 @@ mod tests {
         assert_eq!(status.shell, "tauri");
         assert_eq!(status.native_shortcuts_available, cfg!(target_os = "macos"));
         assert_eq!(status.quick_clip_available, cfg!(target_os = "macos"));
-        assert_eq!(status.audio_capture_available, cfg!(any(target_os = "macos", target_os = "windows", target_os = "linux")));
+        assert_eq!(
+            status.audio_capture_available,
+            cfg!(any(
+                target_os = "macos",
+                target_os = "windows",
+                target_os = "linux"
+            ))
+        );
     }
 }

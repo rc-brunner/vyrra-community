@@ -50,11 +50,11 @@ describe("release navigation", () => {
     ).toHaveAttribute("aria-current", "page");
   });
 
-  it("keeps the primary navigation to three clear destinations", () => {
+  it("keeps the primary navigation to four primary destinations", () => {
     render(<App />);
 
     const primary = screen.getByRole("navigation", { name: "Primary" });
-    expect(primary.querySelectorAll("a")).toHaveLength(3);
+    expect(primary.querySelectorAll("a")).toHaveLength(4);
     expect(screen.getAllByRole("link", { name: "Dictate" })[0])
       .toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: "Library" })[0])

@@ -32,7 +32,9 @@ fn load_bytes(bytes: &[u8]) -> Result<WhisperContext> {
 pub fn load_model(path: &Path) -> Result<WhisperContext> {
     let file = File::open(path).map_err(|_| "Install the speech model on this device first.")?;
     let mut bytes = Vec::new();
-    file.take(MODEL_BYTES + 1).read_to_end(&mut bytes).map_err(|_| DAMAGED)?;
+    file.take(MODEL_BYTES + 1)
+        .read_to_end(&mut bytes)
+        .map_err(|_| DAMAGED)?;
     load_bytes(&bytes)
 }
 
@@ -48,22 +50,29 @@ pub fn install_model(path: &Path, offline: Option<&Path>) -> Result<WhisperConte
             .https_only(true)
             .build()
             .into();
-        let response = agent.get(MODEL_URL).call()
+        let response = agent
+            .get(MODEL_URL)
+            .call()
             .map_err(|_| "The model download failed. Retry or choose a downloaded model.")?;
         Box::new(response.into_body().into_reader())
     };
     let bytes = std::io::copy(&mut source.take(MODEL_BYTES + 1), &mut file)
         .map_err(|_| "The model transfer was interrupted. Please retry.")?;
-    if bytes != MODEL_BYTES { return Err(DAMAGED); }
+    if bytes != MODEL_BYTES {
+        return Err(DAMAGED);
+    }
     file.flush().map_err(|_| "The model could not be saved.")?;
     let model = load_model(file.path())?;
-    file.persist(path).map_err(|_| "The verified model could not be installed.")?;
+    file.persist(path)
+        .map_err(|_| "The verified model could not be installed.")?;
     Ok(model)
 }
 
 #[derive(Clone, Default, Deserialize, Serialize)]
 #[serde(default, rename_all = "camelCase")]
 pub struct SpeechOptions {
+    pub sound: super::feedback::Sound,
+    pub panel_sounds: bool,
     pub language: Option<String>,
     pub translate_to_english: bool,
     pub vocabulary: Vec<String>,
@@ -71,16 +80,33 @@ pub struct SpeechOptions {
 }
 
 #[derive(Clone, Deserialize, Serialize)]
-pub struct Snippet { pub phrase: String, pub text: String }
+pub struct Snippet {
+    pub phrase: String,
+    pub text: String,
+}
 
 impl SpeechOptions {
     pub fn validate(&self) -> Result<()> {
         if let Some(lang) = &self.language
-            && (lang.is_empty() || lang.len() > 12 || !lang.bytes().all(|b| b.is_ascii_lowercase()) || !whisper_rs::get_lang_id(lang).is_some_and(|id| (0..99).contains(&id))) {
+            && (lang.is_empty()
+                || lang.len() > 12
+                || !lang.bytes().all(|b| b.is_ascii_lowercase())
+                || !whisper_rs::get_lang_id(lang).is_some_and(|id| (0..99).contains(&id)))
+        {
             return Err("Choose a supported source language.");
         }
-        if self.vocabulary.len() > 128 || self.vocabulary.iter().any(|word| word.contains('\0') || word.trim().is_empty() || word.chars().count() > 80)
-            || self.snippets.len() > 256 || self.snippets.iter().any(|s| s.phrase.trim().is_empty() || s.phrase.chars().count() > 160 || s.text.trim().is_empty() || s.text.len() > 8192) {
+        if self.vocabulary.len() > 128
+            || self.vocabulary.iter().any(|word| {
+                word.contains('\0') || word.trim().is_empty() || word.chars().count() > 80
+            })
+            || self.snippets.len() > 256
+            || self.snippets.iter().any(|s| {
+                s.phrase.trim().is_empty()
+                    || s.phrase.chars().count() > 160
+                    || s.text.trim().is_empty()
+                    || s.text.len() > 8192
+            })
+        {
             return Err("Check the length and contents of your dictionary or snippets.");
         }
         Ok(())
@@ -88,17 +114,30 @@ impl SpeechOptions {
 }
 
 fn spoken_phrase(s: &str) -> String {
-    s.trim().trim_end_matches(['.', '?', '!']).trim_end().to_lowercase()
+    s.trim()
+        .trim_end_matches(['.', '?', '!'])
+        .trim_end()
+        .to_lowercase()
 }
 
-pub fn transcribe(model: &WhisperContext, audio: &[f32], options: &SpeechOptions) -> Result<String> {
+pub fn transcribe(
+    model: &WhisperContext,
+    audio: &[f32],
+    options: &SpeechOptions,
+) -> Result<String> {
     options.validate()?;
     // Silence and very short clicks otherwise cause Whisper to invent a closing phrase.
-    if audio.len() < 3_200 || !audio.chunks(320).any(|frame| frame.iter().map(|s| s*s).sum::<f32>() / frame.len() as f32 > 0.000004) {
+    if audio.len() < 3_200
+        || !audio
+            .chunks(320)
+            .any(|frame| frame.iter().map(|s| s * s).sum::<f32>() / frame.len() as f32 > 0.000004)
+    {
         return Err("No speech was detected.");
     }
     let mut params = FullParams::new(SamplingStrategy::Greedy { best_of: 1 });
-    params.set_n_threads(std::thread::available_parallelism().map_or(2, |v| v.get().clamp(1, 6)) as i32);
+    params.set_n_threads(
+        std::thread::available_parallelism().map_or(2, |v| v.get().clamp(1, 6)) as i32,
+    );
     params.set_language(options.language.as_deref());
     params.set_translate(options.translate_to_english);
     params.set_no_context(true);
@@ -107,25 +146,42 @@ pub fn transcribe(model: &WhisperContext, audio: &[f32], options: &SpeechOptions
     params.set_print_realtime(false);
     params.set_print_timestamps(false);
     params.set_suppress_blank(true);
-    if !options.vocabulary.is_empty() { params.set_initial_prompt(&options.vocabulary.join(", ")); }
-    let mut state = model.create_state().map_err(|_| "The device could not allocate memory for transcription.")?;
+    if !options.vocabulary.is_empty() {
+        params.set_initial_prompt(&options.vocabulary.join(", "));
+    }
+    let mut state = model
+        .create_state()
+        .map_err(|_| "The device could not allocate memory for transcription.")?;
     // Whisper requires roughly a second of input, including for a single spoken word.
     let mut padded = Vec::new();
     let input = if audio.len() < 16_000 {
         padded.extend_from_slice(audio);
         padded.resize(16_000, 0.0);
         &padded[..]
-    } else { audio };
-    state.full(params, input).map_err(|_| "Local transcription failed.")?;
+    } else {
+        audio
+    };
+    state
+        .full(params, input)
+        .map_err(|_| "Local transcription failed.")?;
     let mut text = String::new();
     for segment in state.as_iter() {
         if segment.no_speech_probability() < 0.8 {
-            text.push_str(&segment.to_str_lossy().map_err(|_| "A transcript segment could not be read.")?);
+            text.push_str(
+                &segment
+                    .to_str_lossy()
+                    .map_err(|_| "A transcript segment could not be read.")?,
+            );
         }
     }
     let text = text.trim();
-    if text.is_empty() { return Err("No speech was detected."); }
+    if text.is_empty() {
+        return Err("No speech was detected.");
+    }
     let phrase = spoken_phrase(text);
-    Ok(options.snippets.iter().find(|s| spoken_phrase(&s.phrase) == phrase)
+    Ok(options
+        .snippets
+        .iter()
+        .find(|s| spoken_phrase(&s.phrase) == phrase)
         .map_or_else(|| text.to_owned(), |s| s.text.clone()))
 }

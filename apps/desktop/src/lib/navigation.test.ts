@@ -25,7 +25,7 @@ describe("navigation", () => {
 
   it("validates release route identifiers and generates canonical hashes", () => {
     expect(isRouteId("library")).toBe(true);
-    expect(isRouteId("meetings")).toBe(false);
+    expect(isRouteId("meetings")).toBe(true);
     expect(hrefForRoute("library")).toBe("#/library");
   });
 });

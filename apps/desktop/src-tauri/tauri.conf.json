@@ -36,6 +36,21 @@
         "alwaysOnTop": true,
         "visibleOnAllWorkspaces": true,
         "skipTaskbar": true
+      },
+      {
+        "label": "meeting-indicator",
+        "url": "index.html#/meeting-indicator",
+        "title": "Vyrra meeting notes",
+        "width": 284,
+        "height": 60,
+        "resizable": false,
+        "visible": false,
+        "focus": false,
+        "focusable": false,
+        "decorations": false,
+        "alwaysOnTop": true,
+        "visibleOnAllWorkspaces": true,
+        "skipTaskbar": true
       }
     ],
     "security": {
@@ -52,7 +67,7 @@
     "category": "Productivity",
     "shortDescription": "A private, local-first voice workspace.",
     "longDescription": "Vyrra Desktop is a private, local-first workspace for intentional voice capture, transcription, notes, and user-controlled recall.",
-    "copyright": "Copyright © 2026 Runner Concepts. All rights reserved.",
+    "copyright": "Copyright \u00a9 2026 Runner Concepts. All rights reserved.",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

@@ -5,6 +5,7 @@ import {
   type ReactNode,
 } from "react";
 import {
+  CalendarDays,
   LibraryBig,
   Mic2,
   Settings2,
@@ -31,6 +32,9 @@ const navigation = [
     label: "Library",
     icon: LibraryBig,
     href: hrefForRoute("library"),
+  },
+  {
+    id: "meetings", route: "meetings", label: "Meetings", icon: CalendarDays, href: hrefForRoute("meetings"),
   },
   {
     id: "settings",

@@ -178,3 +178,20 @@
   .vyrra-row-actions .vyrra-icon, .vyrra-icon:active:not(:disabled) svg { transform: none !important; }
 }
 .vyrra-row-actions .lucide-pin { rotate: 34deg; }
+
+.vyrra-tip, .sound-menu { border: 1px solid var(--pvw-line); background: var(--pvw-surface-raised); color: var(--pvw-ink); box-shadow: 0 4px 16px #0002; z-index: 50; animation: quiet-appear 140ms cubic-bezier(.2,.75,.25,1) both; }
+.vyrra-tip { position: fixed; pointer-events: none; border-radius: 6px; padding: 4px 8px; font-size: 12px; line-height: 18px; max-width: min(240px, calc(100vw - 16px)); }
+.sound-trigger { display: inline-flex; align-items: center; gap: .4rem; padding: .45rem .6rem; border-radius: .5rem; font-size: .875rem; color: var(--pvw-ink); }
+.sound-trigger:hover, .sound-trigger[aria-expanded=true], .sound-menu [data-active=true] { background: var(--pvw-surface-strong); }
+.sound-trigger svg { transition: transform 140ms ease; }.sound-trigger[aria-expanded=true] svg { transform: rotate(180deg); }
+.sound-menu { position: absolute; top: calc(100% + 5px); right: 0; min-width: 9rem; padding: 4px; border-radius: .7rem; outline: none; }
+.sound-menu [role=option] { display: flex; align-items: center; justify-content: space-between; padding: .45rem .6rem; font-size: .83rem; border-radius: .45rem; cursor: pointer; }
+@keyframes quiet-appear { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .vyrra-tip, .sound-menu { animation: none; }.sound-trigger svg { transition: none; } }
+.participant-avatar { width: 56px; height: 56px; border-radius: 17px; position: relative; flex: none; }
+.participant-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }.avatar-tools { position:absolute; inset:0; display:grid; place-items:center; border-radius:inherit; background:#10111399; opacity:0; transition:opacity .13s ease; }.avatar-tools .vyrra-icon {color:white;}.participant-avatar:is(:hover,:focus-within) .avatar-tools {opacity:1;}
+@media (hover:none), (any-pointer:coarse) {.avatar-tools {opacity:1;inset:auto -5px -5px auto;background:var(--pvw-surface-raised);border:1px solid var(--pvw-line);border-radius:100%;}.avatar-tools .vyrra-icon {color:var(--pvw-ink);}}
+@media (prefers-reduced-motion:reduce) {.avatar-tools {transition:none;}}
+.quiet-panel {animation:quiet-appear .16s cubic-bezier(.2,.75,.25,1) both;}
+@media (prefers-reduced-motion: reduce) {.quiet-panel {animation:none;}}
+.mini-wave { display:inline-flex; height:28px; align-items:center; gap:2px; color:var(--pvw-ink); }.mini-wave i { width:3px; border-radius:3px; background:currentColor; transition:height 100ms ease-out; }@media (prefers-reduced-motion:reduce){.mini-wave i{transition:none;}}

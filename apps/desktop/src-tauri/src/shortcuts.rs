@@ -883,6 +883,17 @@ mod tests {
         assert!(!detector.handle(55, KeyPhase::Up, 900, 350, 250));
     }
 
+    #[cfg(not(target_os = "macos"))]
+    #[test]
+    fn quick_clip_double_tap_has_no_native_modifier_listener_here() {
+        let key = NativeShortcutKey {
+            code: "Meta".to_string(),
+            location: NativeShortcutKeyLocation::Left,
+        };
+        assert!(platform::virtual_key_codes(&key).is_none());
+    }
+
+    #[cfg(target_os = "macos")]
     #[test]
     fn rejects_overlapping_either_side_and_side_specific_bindings() {
         let bindings = vec![

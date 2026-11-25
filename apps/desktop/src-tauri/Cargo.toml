@@ -25,7 +25,13 @@ cpal = "=0.16.0"
 whisper-rs = "=0.16.0"
 sha2 = "0.10"
 tempfile = "3"
-ureq = "=3.5.2"
+ureq = { version = "=3.5.2", features = ["json"] }
+base64 = "0.22"
+image = { version = "0.25", default-features = false, features = ["png", "jpeg"] }
+url = "2"
+time = { version = "0.3", features = ["formatting"] }
+open = "5"
+keyring = { version = "3.6", features = ["apple-native", "windows-native"] }
 hound = "=3.5.1"
 rfd = "=0.15.4"
 fs2 = "0.4"

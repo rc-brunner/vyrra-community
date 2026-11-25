@@ -107,3 +107,8 @@ test("record the desktop disclosure for visual review", async ({ browser }) => {
   await page.video()!.saveAs(join(output!, "library-disclosure.webm"));
   await page.video()!.delete();
 });
+
+test("keyboard focus shows a tooltip and Escape dismisses it",async({page})=>{
+  await openLibrary(page,"dark");const pin=page.getByRole("button",{name:"Pin transcript"}).first();await pin.focus();
+  await expect(page.getByRole("tooltip")).toHaveText("Pin transcript");await page.keyboard.press("Escape");await expect(page.getByRole("tooltip")).toHaveCount(0);await expect(pin).toBeFocused();
+});

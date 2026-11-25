@@ -5,7 +5,7 @@ import AVFoundation
 final class DictationSessionControllerTests: XCTestCase {
     @MainActor
     func testBundledDictationClicksAreShortAndTheStartCueReturns() async throws {
-        for name in ["engage", "release"] {
+        for name in DictationSound.Palette.allCases.flatMap({ [$0.file(closing: false), $0.file(closing: true)].compactMap { $0 } }) {
             let url = try XCTUnwrap(Bundle.main.url(forResource: name, withExtension: "wav", subdirectory: "DictationSounds"))
             let file = try AVAudioFile(forReading: url)
             let duration = Double(file.length) / file.processingFormat.sampleRate
@@ -15,6 +15,19 @@ final class DictationSessionControllerTests: XCTestCase {
         let clock = ContinuousClock()
         let elapsed = await clock.measure { await DictationSound.engageBeforeCapture() }
         XCTAssertLessThan(elapsed, .seconds(1))
+    }
+
+    @MainActor
+    func testExistingMuteAndSoundSelectionSurviveUpgrade() throws {
+        let suite = UUID().uuidString
+        let values = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { values.removePersistentDomain(forName: suite) }
+        XCTAssertEqual(DictationSound.palette(in: values), .classic)
+        values.set(false, forKey: DictationSound.preferenceKey)
+        XCTAssertEqual(DictationSound.palette(in: values), .off)
+        values.set(true, forKey: DictationSound.preferenceKey)
+        values.set("felt", forKey: DictationSound.paletteKey)
+        XCTAssertEqual(DictationSound.palette(in: values).file(closing: true), "felt-release")
     }
 
     func testKeyboardCaptureDiscardsAudioBetweenSeparatePhrases() throws {

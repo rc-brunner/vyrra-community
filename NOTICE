@@ -5,4 +5,4 @@ The Apache License, Version 2.0 applies to the Vyrra source in this repository.
 Third-party components keep their own licenses. The iPhone acknowledgments are
 in iphone/Vyrra/Resources/ThirdPartyLicenses. Speech and writing model weights
 are separate optional downloads. OpenAI Whisper is MIT licensed and Qwen2.5
-1.5B Instruct is Apache-2.0 licensed. Vexa is a separately deployed project.
+1.5B Instruct is Apache-2.0 licensed. Attendee is an optional separately deployed project with its own license.

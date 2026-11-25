@@ -4,7 +4,8 @@
   "description": "Minimum authority for the Vyrra main window.",
   "windows": [
     "main",
-    "indicator"
+    "indicator",
+    "meeting-indicator"
   ],
   "permissions": [
     "core:default"

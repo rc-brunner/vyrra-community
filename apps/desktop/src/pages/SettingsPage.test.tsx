@@ -80,7 +80,7 @@ describe("release settings", () => {
     const navigation = screen.getByRole("navigation", {
       name: "Settings sections",
     });
-    expect(navigation.querySelectorAll("a")).toHaveLength(4);
+    expect(navigation.querySelectorAll("a")).toHaveLength(5);
     expect(screen.getByRole("link", { name: "Dictation" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Shortcuts" }))
       .toBeInTheDocument();

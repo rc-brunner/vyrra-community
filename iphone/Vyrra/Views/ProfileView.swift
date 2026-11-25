@@ -9,7 +9,6 @@ struct ProfileView: View {
     @Query(sort: \TranscriptionRecord.createdAt, order: .reverse) private var records: [TranscriptionRecord]
     @AppStorage("profileDisplayName") private var displayName = "Vyrra User"
     @AppStorage("profileContactEmail") private var contactEmail = ""
-    @AppStorage(DictationSound.preferenceKey) private var dictationSoundsEnabled = true
     @AppStorage(VyrraAppearance.storageKey) private var appearanceRawValue = VyrraAppearance.system.rawValue
     @AppStorage(VyrraAccent.storageKey) private var accentRawValue = VyrraAccent.monochrome.rawValue
     @State private var showsEditProfile = false
@@ -32,10 +31,9 @@ struct ProfileView: View {
                     }
 
                     ProfileSection {
-                        Toggle("Dictation Sounds", isOn: $dictationSoundsEnabled)
+                        DictationSoundPicker()
                             .font(.body.weight(.medium))
-                            .tint(Color(.systemGreen))
-                            .padding(.vertical, 14)
+                            .padding(.vertical, 6)
 
                         Divider()
 

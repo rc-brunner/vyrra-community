@@ -25,26 +25,9 @@ describe("truthful prototype capability boundaries", () => {
   it("renders a genuine empty meeting history instead of fake data", () => {
     render(<MeetingsPage />);
 
-    expect(screen.getByText("0 local meetings")).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: "No meetings are stored" }),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("searchbox", { name: "Search meetings" }))
-      .toBeDisabled();
-    expect(
-      screen.getByText(/will not seed plausible transcripts or participant data/i),
-    ).toBeInTheDocument();
-    expect(screen.getByText("State fixture")).toBeInTheDocument();
-    expect(
-      screen.getByText(/interface-only examples/i),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/Suggestion only · never auto-starts capture/i),
-    ).toBeInTheDocument();
-    expect(screen.getByText("Live transcript is idle")).toBeInTheDocument();
-    expect(
-      screen.getByText(/Speaker merge and transcript regeneration/i),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", {name:"No meetings yet"})).toBeInTheDocument();
+    expect(screen.getByRole("button", {name:"Schedule a meeting"})).toBeDisabled();
+    expect(screen.queryByText("State fixture")).not.toBeInTheDocument();
   });
 
   it("keeps the dashboard recent-meeting section honest", () => {

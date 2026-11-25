@@ -1,4 +1,5 @@
 mod dictation;
+mod meetings;
 mod native;
 mod runtime;
 mod shortcuts;
@@ -19,17 +20,39 @@ pub fn run() {
         .manage(native_state)
         .on_window_event(|window, event| {
             use tauri::Manager;
-            if window.label() == "main" && matches!(event, tauri::WindowEvent::CloseRequested { .. }) {
-                if let Some(state) = window.try_state::<dictation::Dictation>() { state.cancel(); }
-                if let Some(panel) = window.get_webview_window("indicator") { let _ = panel.destroy(); }
+            if window.label() == "main"
+                && matches!(event, tauri::WindowEvent::CloseRequested { .. })
+            {
+                if let Some(state) = window.try_state::<meetings::Meetings>() {
+                    state.shutdown();
+                }
+                if let Some(panel) = window.get_webview_window("meeting-indicator") {
+                    let _ = panel.destroy();
+                }
+                if let Some(state) = window.try_state::<dictation::Dictation>() {
+                    state.cancel();
+                }
+                if let Some(panel) = window.get_webview_window("indicator") {
+                    let _ = panel.destroy();
+                }
             }
         })
         .setup(move |app| {
             shortcuts::initialize_native_shortcuts(app.handle(), &startup_state);
             dictation::setup(app.handle())?;
+            meetings::setup(app.handle())?;
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            meetings::calendar::meeting_calendar,
+            meetings::meeting_list,
+            meetings::meeting_profile,
+            meetings::meeting_picture,
+            meetings::meeting_key,
+            meetings::meeting_schedule,
+            meetings::meeting_action,
+            meetings::meeting_stop_active,
+            meetings::meeting_indicator_phase,
             runtime_status,
             native_permission_status,
             request_native_permission,
@@ -41,6 +64,9 @@ pub fn run() {
             dictation::writing::writing_install,
             dictation::writing::writing_cancel,
             dictation::writing::writing_run,
+            dictation::feedback::dictation_preview_sound,
+            dictation::feedback::dictation_set_feedback,
+            dictation::feedback::panel_sound,
             dictation::dictation_status,
             dictation::dictation_install,
             dictation::hotkeys::dictation_hotkeys,

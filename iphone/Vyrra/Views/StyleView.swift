@@ -4,7 +4,6 @@ struct StyleView: View {
     @EnvironmentObject private var modelManager: ModelManager
     @Environment(\.vyrraAccentColor) private var accentColor
     @AppStorage(VyrraAccent.storageKey) private var accentRawValue = VyrraAccent.monochrome.rawValue
-    @AppStorage(DictationSound.preferenceKey) private var dictationSoundsEnabled = true
 
     var body: some View {
         NavigationStack {
@@ -120,7 +119,7 @@ struct StyleView: View {
 
                             Toggle("Haptic Feedback", isOn: $modelManager.hapticsEnabled)
                                 .font(.body)
-                            Toggle("Dictation Sounds", isOn: $dictationSoundsEnabled)
+                            DictationSoundPicker()
                                 .font(.body)
                         }
                     }

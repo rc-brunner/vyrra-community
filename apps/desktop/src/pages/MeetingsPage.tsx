@@ -1,384 +1,478 @@
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ArchiveRestore,
-  AudioLines,
-  Captions,
-  CheckCircle2,
-  CircleAlert,
-  Clock3,
-  FileWarning,
-  LoaderCircle,
-  MessageSquareText,
-  NotebookTabs,
-  PauseCircle,
-  Search,
-  ScanSearch,
-  Upload,
-  UsersRound,
-  VolumeX,
-  WandSparkles,
-  WifiOff,
+  Calendar,
+  CalendarPlus,
+  CalendarDays,
+  Check,
+  Download,
+  FileUp,
+  RefreshCw,
+  Settings2,
+  Square,
+  Trash2,
+  X,
 } from "lucide-react";
-
+import { invoke } from "@tauri-apps/api/core";
+import { Button, EmptyState, PageHeader } from "../components/ui";
+import { QuietIcon } from "../components/QuietIcon";
+import { WritingTools } from "../components/WritingTools";
+import { isNativeDesktop } from "../lib/native";
+import { message, panelSound } from "../lib/dictation";
 import {
-  Badge,
-  Button,
-  Card,
-  EmptyState,
-  InlineNotice,
-  PageHeader,
-  SectionHeading,
-} from "../components/ui";
-import { cn } from "../lib/cn";
-
-const meetingStates = [
-  {
-    id: "processing",
-    label: "Processing",
-    title: "Finalization in progress",
-    detail: "Buffers are draining; ready is not reported yet.",
-    tone: "info" as const,
-    icon: LoaderCircle,
-  },
-  {
-    id: "offline",
-    label: "Offline",
-    title: "Local route preserved",
-    detail: "Network is unavailable and cloud fallback remains denied.",
-    tone: "success" as const,
-    icon: WifiOff,
-  },
-  {
-    id: "recoverable",
-    label: "Recoverable",
-    title: "Incomplete journal found",
-    detail: "Integrity must be validated before recovery choices appear.",
-    tone: "warning" as const,
-    icon: ArchiveRestore,
-  },
-  {
-    id: "terminal",
-    label: "Terminal",
-    title: "Session is incomplete",
-    detail: "A redacted diagnosis and safe cleanup path remain visible.",
-    tone: "danger" as const,
-    icon: FileWarning,
-  },
-] as const;
-
-type MeetingStateId = (typeof meetingStates)[number]["id"];
-
-export function MeetingsPage() {
-  const [selectedState, setSelectedState] =
-    useState<MeetingStateId>("recoverable");
-  const activeState =
-    meetingStates.find((state) => state.id === selectedState) ??
-    meetingStates[0];
-  const ActiveIcon = activeState.icon;
-
+  calendarCalls,
+  isFinal,
+  meetings,
+  phaseName,
+  type MeetingEvent,
+  type MeetingMode,
+  type MeetingPlan,
+  type MeetingView,
+} from "../lib/meetings";
+const field =
+  "w-full rounded-control border border-line bg-canvas-subtle p-2 text-sm text-ink";
+const when = (time: number) =>
+  new Date(time).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+function AddMeeting({
+  view,
+  done,
+}: {
+  view: MeetingView;
+  done: () => Promise<void>;
+}) {
+  const [items, setItems] = useState<MeetingEvent[]>([]),
+    [pick, setPick] = useState(""),
+    [owner, setOwner] = useState(""),
+    [file, setFile] = useState(""),
+    [loaded, setLoaded] = useState(false),
+    [mode, setMode] = useState<MeetingMode>("local"),
+    [consent, setConsent] = useState(false),
+    [busy, setBusy] = useState(false),
+    [error, setError] = useState("");
+  const input = useRef<HTMLInputElement>(null);
+  const mac = view.sources.some(([id]) => id === "com.apple.Safari");
+  const localSource = view.sources.find(
+    ([id]) => id === view.profile.source,
+  )?.[1];
+  const show = (events: MeetingEvent[]) => {
+    setLoaded(true);
+    const available = events.filter((e) => e.startMs > Date.now());
+    setItems(available);
+    setPick(available[0]?.uid ?? "");
+    setConsent(false);
+  };
+  async function run(f: () => Promise<void>) {
+    setError("");
+    setBusy(true);
+    try {
+      await f();
+    } catch (e) {
+      setError(message(e));
+    } finally {
+      setBusy(false);
+    }
+  }
   return (
-    <div className="space-y-9">
-      <PageHeader
-        eyebrow="Meetings"
-        title="Your local record, with no invented history."
-        description="Real sessions will be backed by validated journals, independently revisioned transcripts and notes, and explicit retention state."
-        actions={<Badge tone="neutral">0 local meetings</Badge>}
-      />
-
-      <section aria-labelledby="meeting-list-heading" className="space-y-4">
-        <SectionHeading
-          id="meeting-list-heading"
-          title="Meeting history"
-          description="Search and filters activate when durable meeting data exists."
-          action={
-            <div className="relative hidden sm:block">
-              <Search
-                size={15}
-                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint"
-                aria-hidden="true"
-              />
-              <input
-                type="search"
-                disabled
-                aria-label="Search meetings"
-                placeholder="Search meetings"
-                className="min-h-10 w-52 rounded-control border border-line-strong bg-surface-raised pl-9 pr-3 text-sm text-ink placeholder:text-ink-faint disabled:cursor-not-allowed disabled:opacity-55"
-              />
-            </div>
-          }
+    <form
+      className="quiet-panel space-y-4 rounded-control border border-line bg-surface p-4"
+      onSubmit={(e) => {
+        e.preventDefault();
+        const event = items.find((i) => i.uid === pick);
+        if (event && consent)
+          void run(async () => {
+            await invoke("meeting_schedule", { event, mode });
+            await done();
+          });
+      }}
+    >
+      <div className="flex items-center gap-2">
+        {mac && (
+          <Button
+            variant="secondary"
+            disabled={busy}
+            onClick={() =>
+              void run(async () => {
+                setFile("");
+                show(await invoke<MeetingEvent[]>("meeting_calendar"));
+              })
+            }
+          >
+            <Calendar size={15} />
+            Choose from Calendar
+          </Button>
+        )}
+        <Button
+          variant="quiet"
+          disabled={busy}
+          onClick={() => input.current?.click()}
+        >
+          <FileUp size={15} />
+          Import .ics
+        </Button>
+        <input
+          type="file"
+          ref={input}
+          className="hidden"
+          accept=".ics,text/calendar"
+          aria-label="Calendar file"
+          onChange={(e) => {
+            const chosen = e.target.files?.[0];
+            if (chosen)
+              void run(async () => {
+                if (chosen.size > 2_000_000)
+                  throw new Error("Choose a calendar file under 2 MB.");
+                const text = await chosen.text();
+                setFile(text);
+                show(calendarCalls(text, owner));
+              });
+            e.target.value = "";
+          }}
         />
-        <div>
-          <EmptyState
-            icon={<Clock3 size={21} aria-hidden="true" />}
-            title="No meetings are stored"
-            description="This is the genuine empty state. The interface will not seed plausible transcripts or participant data into a production path."
+      </div>
+      {file && (
+        <label className="block text-xs text-ink-soft">
+          Your calendar email
+          <input
+            type="email"
+            className={field}
+            placeholder="For invitations with an RSVP"
+            value={owner}
+            onChange={(e) => {
+              setOwner(e.target.value);
+              try {
+                show(calendarCalls(file, e.target.value));
+              } catch (err) {
+                setError(message(err));
+              }
+            }}
           />
-        </div>
-      </section>
-
-      <section
-        aria-labelledby="meeting-intelligence-heading"
-        className="space-y-4"
-      >
-        <SectionHeading
-          id="meeting-intelligence-heading"
-          title="Meeting intelligence"
-          description="Advanced capture and note tools are included in product scope, with visible consent and review boundaries that the reference product does not always require."
-        />
-        <div className="grid gap-5 xl:grid-cols-2">
-          <Card className="overflow-hidden">
-            <div className="border-b border-line bg-canvas-subtle px-5 py-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="grid size-9 place-items-center rounded-xl bg-accent-soft text-accent">
-                    <ScanSearch size={17} aria-hidden="true" />
-                  </span>
-                  <div>
-                    <h3 className="text-sm font-semibold text-ink">
-                      Meeting detection
-                    </h3>
-                    <p className="mt-0.5 text-[0.7rem] text-ink-faint">
-                      Suggestion only · never auto-starts capture
-                    </p>
-                  </div>
-                </div>
-                <Badge tone="warning">Native adapter required</Badge>
-              </div>
-            </div>
-
-            <div className="divide-y divide-line px-5">
-              {[
-                {
-                  icon: PauseCircle,
-                  title: "Pause and resume",
-                  detail: "Visible indicator remains present",
-                },
-                {
-                  icon: VolumeX,
-                  title: "Mute background audio",
-                  detail: "Separate from recorded source state",
-                },
-                {
-                  icon: Captions,
-                  title: "Real-time transcript",
-                  detail: "Partial and final segments stay distinct",
-                },
-                {
-                  icon: MessageSquareText,
-                  title: "Ask during the meeting",
-                  detail: "Scoped only to the active transcript",
-                },
-              ].map(({ icon: Icon, title, detail }) => (
-                <div
-                  key={title}
-                  className="flex items-center justify-between gap-4 py-4"
-                >
-                  <span className="flex min-w-0 items-center gap-3 text-xs font-semibold text-ink">
-                    <Icon
-                      size={16}
-                      className="shrink-0 text-ink-faint"
-                      aria-hidden="true"
-                    />
-                    {title}
-                  </span>
-                  <span className="text-right text-[0.68rem] text-ink-faint">
-                    {detail}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <div className="border-t border-line p-5">
-              <div className="rounded-control border border-dashed border-line-strong bg-canvas-subtle p-5 text-center">
-                <AudioLines
-                  size={20}
-                  className="mx-auto text-ink-faint"
-                  aria-hidden="true"
-                />
-                <p className="mt-2 text-xs font-semibold text-ink">
-                  Live transcript is idle
-                </p>
-                <p className="mt-1 text-[0.7rem] text-ink-faint">
-                  No audio source or streaming model is connected
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="overflow-hidden">
-            <div className="border-b border-line bg-canvas-subtle px-5 py-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="grid size-9 place-items-center rounded-xl bg-accent-soft text-accent">
-                    <NotebookTabs size={17} aria-hidden="true" />
-                  </span>
-                  <div>
-                    <h3 className="text-sm font-semibold text-ink">
-                      Note workspace
-                    </h3>
-                    <p className="mt-0.5 text-[0.7rem] text-ink-faint">
-                      Independent from summary success
-                    </p>
-                  </div>
-                </div>
-                <Badge tone="neutral">No meeting selected</Badge>
-              </div>
-            </div>
-
-            <div className="grid gap-3 p-5 sm:grid-cols-2">
-              {[
-                {
-                  icon: UsersRound,
-                  title: "Speaker review",
-                  detail:
-                    "Uncertain labels stay editable; source evidence is revisioned.",
-                },
-                {
-                  icon: WandSparkles,
-                  title: "Custom templates",
-                  detail:
-                    "Summary template and note instructions are recorded in provenance.",
-                },
-                {
-                  icon: MessageSquareText,
-                  title: "Chat with this note",
-                  detail:
-                    "Context is the open item only, never the entire library by default.",
-                },
-                {
-                  icon: Upload,
-                  title: "Import media as a note",
-                  detail:
-                    "Uses the same bounded parser and retention preflight as file transcription.",
-                },
-              ].map(({ icon: Icon, title, detail }) => (
-                <div
-                  key={title}
-                  className="rounded-control border border-line bg-surface-raised p-4"
-                >
-                  <Icon
-                    size={17}
-                    className="text-ink-faint"
-                    aria-hidden="true"
-                  />
-                  <h4 className="mt-3 text-xs font-semibold text-ink">
-                    {title}
-                  </h4>
-                  <p className="mt-1.5 text-xs leading-5 text-ink-soft">
-                    {detail}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            <div className="border-t border-line px-5 py-4">
-              <p className="text-xs leading-5 text-ink-soft">
-                Speaker merge and transcript regeneration are destructive or
-                evidence-changing operations. They require an explicit preview,
-                revision record, and recoverable prior state.
-              </p>
-            </div>
-          </Card>
-        </div>
-      </section>
-
-      <section aria-labelledby="state-gallery-heading" className="space-y-4">
-        <SectionHeading
-          id="state-gallery-heading"
-          title="Meeting-state gallery"
-          description="Isolated UI fixtures for reviewing recovery and failure language."
-        />
-        <Card className="overflow-hidden">
-          <div
-            className="flex gap-1 overflow-x-auto border-b border-line bg-canvas-subtle p-2"
-            role="group"
-            aria-label="Meeting state previews"
-          >
-            {meetingStates.map((state) => (
-              <button
-                key={state.id}
-                type="button"
-                aria-pressed={state.id === selectedState}
-                onClick={() => setSelectedState(state.id)}
-                className={cn(
-                  "min-h-10 shrink-0 rounded-control px-3 text-xs font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-focus",
-                  state.id === selectedState
-                    ? "bg-surface-raised text-ink shadow-soft"
-                    : "text-ink-soft hover:bg-surface-strong hover:text-ink",
-                )}
-              >
-                {state.label}
-              </button>
-            ))}
-          </div>
-
-          <div
-            id="meeting-state-panel"
-            aria-live="polite"
-            className="grid gap-5 p-5 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center md:p-7"
-          >
-            <span
-              className={cn(
-                "grid size-12 place-items-center rounded-2xl",
-                activeState.tone === "success" &&
-                  "bg-success-soft text-success",
-                activeState.tone === "warning" &&
-                  "bg-warning-soft text-warning",
-                activeState.tone === "danger" && "bg-danger-soft text-danger",
-                activeState.tone === "info" && "bg-info-soft text-info",
-              )}
+        </label>
+      )}
+      {items.length > 0 ? (
+        <>
+          <label className="block text-xs text-ink-soft">
+            Meeting
+            <select
+              className={field}
+              value={pick}
+              onChange={(e) => {
+                setPick(e.target.value);
+                setConsent(false);
+              }}
             >
-              <ActiveIcon size={22} aria-hidden="true" />
-            </span>
-
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge tone={activeState.tone}>{activeState.label}</Badge>
-                <Badge tone="neutral">State fixture</Badge>
+              {items.map((e) => (
+                <option value={e.uid} key={e.uid}>
+                  {e.title} · {when(e.startMs)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block text-xs text-ink-soft">
+            Join with
+            <select
+              className={field}
+              value={mode}
+              onChange={(e) => {
+                setMode(e.target.value as MeetingMode);
+                setConsent(false);
+              }}
+            >
+              <option value="local">This computer</option>
+              <option value="participant">
+                {view.profile.name} · self-hosted participant
+              </option>
+            </select>
+          </label>
+          <label className="flex items-start gap-2 text-sm text-ink">
+            <input
+              type="checkbox"
+              className="mt-1"
+              checked={consent}
+              onChange={(e) => setConsent(e.target.checked)}
+            />
+            {mode === "local"
+              ? `Open this call at its start and take notes from my microphone and ${localSource ?? "meeting audio"}. I’ll let everyone know.`
+              : `Send this call, participant name, and picture to my server. The participant will announce that it takes notes.`}
+          </label>
+          {mode === "participant" && !view.profile.server ? (
+            <a className="text-sm underline" href="#/settings/meetings">
+              Set up participant server
+            </a>
+          ) : (
+            <Button type="submit" disabled={busy || !consent}>
+              Schedule
+            </Button>
+          )}
+        </>
+      ) : (
+        loaded && (
+          <p role="status" className="text-sm text-ink-soft">
+            No upcoming accepted calls found.
+          </p>
+        )
+      )}
+      {error && (
+        <p role="alert" className="text-sm text-ink-soft">
+          {error}
+        </p>
+      )}
+    </form>
+  );
+}
+function MeetingRow({
+  plan,
+  reload,
+}: {
+  plan: MeetingPlan;
+  reload: () => Promise<void>;
+}) {
+  const [open, setOpen] = useState(false),
+    [del, setDel] = useState(false),
+    [error, setError] = useState(""),
+    [busy, setBusy] = useState(false);
+  const closed = isFinal(plan.phase);
+  async function run(op: () => Promise<unknown>) {
+    setBusy(true);
+    setError("");
+    try {
+      await op();
+      await reload();
+    } catch (e) {
+      setError(message(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+  const action = (action: string) =>
+    run(() => invoke("meeting_action", { key: plan.key, action }));
+  return (
+    <article className="vyrra-transcript" data-open={open}>
+      <div className="vyrra-transcript-row">
+        <button
+          className="vyrra-row-summary flex-1 flex-col items-start text-left"
+          type="button"
+          aria-expanded={open}
+          onClick={() => {panelSound(open);setOpen(!open);}}
+        >
+          <span className="block truncate text-sm font-medium text-ink">
+            {plan.event.title}
+          </span>
+          <span className="text-xs text-ink-soft">
+            {when(plan.event.startMs)} · {phaseName(plan.phase)}
+          </span>
+        </button>
+        <div className="vyrra-row-actions">
+          {plan.mode === "participant" && !closed && (
+            <QuietIcon
+              icon={RefreshCw}
+              label="Refresh participant"
+              disabled={busy}
+              onClick={() => void action("refresh")}
+            />
+          )}
+          {closed ? (
+            <QuietIcon
+              icon={Trash2}
+              label="Delete meeting notes"
+              onClick={() => {
+                setOpen(true);
+                setDel(true);
+              }}
+            />
+          ) : (
+            <QuietIcon
+              icon={Square}
+              label={
+                plan.phase === "scheduled"
+                  ? "Cancel scheduled meeting"
+                  : "Stop meeting notes"
+              }
+              disabled={busy}
+              onClick={() => void action("stop")}
+            />
+          )}
+        </div>
+      </div>
+      {open && (
+        <div className="quiet-panel space-y-3 p-3">
+          {plan.notes && (
+            <p className="whitespace-pre-wrap text-sm text-ink">{plan.notes}</p>
+          )}
+          {plan.transcript ? (
+            <>
+              <details>
+                <summary className="text-sm text-ink-soft">Transcript</summary>
+                <p className="whitespace-pre-wrap py-2 text-sm text-ink">
+                  {plan.transcript}
+                </p>
+              </details>
+              <div className="flex items-center gap-1">
+                <QuietIcon
+                  icon={Download}
+                  label="Export meeting notes and transcript"
+                  onClick={() =>
+                    void run(() =>
+                      invoke("dictation_export", {
+                        text: [plan.event.title, plan.notes, plan.transcript]
+                          .filter(Boolean)
+                          .join("\n\n"),
+                      }),
+                    )
+                  }
+                />
+                <WritingTools source={plan.transcript} initial="meetingNotes" />
               </div>
-              <h3 className="mt-3 text-lg font-semibold text-ink">
-                {activeState.title}
-              </h3>
-              <p className="mt-1.5 text-sm leading-6 text-ink-soft">
-                {activeState.detail}
-              </p>
+            </>
+          ) : (
+            <p className="text-sm text-ink-soft">
+              {closed
+                ? "No transcript was captured."
+                : plan.mode === "local"
+                  ? "Keep Vyrra open until the call ends."
+                  : "Your server manages this participant."}
+            </p>
+          )}
+          {del && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="danger"
+                disabled={busy}
+                onClick={() => void action("delete")}
+              >
+                Delete local notes
+              </Button>
+              <QuietIcon
+                icon={X}
+                label="Keep meeting notes"
+                onClick={() => setDel(false)}
+              />
             </div>
-
-            <div className="flex flex-wrap gap-2 md:justify-end">
-              {selectedState === "recoverable" ? (
-                <>
-                  <Button variant="secondary" disabled>
-                    Validate journal
-                  </Button>
-                  <Button variant="quiet" disabled>
-                    Review choices
-                  </Button>
-                </>
-              ) : selectedState === "processing" ? (
-                <Button variant="secondary" disabled>
-                  <LoaderCircle size={15} aria-hidden="true" />
-                  Finalizing
-                </Button>
-              ) : selectedState === "offline" ? (
-                <span className="flex items-center gap-2 text-xs font-semibold text-success">
-                  <CheckCircle2 size={16} aria-hidden="true" />
-                  Route unchanged
-                </span>
-              ) : (
-                <Button variant="secondary" disabled>
-                  <CircleAlert size={15} aria-hidden="true" />
-                  View diagnosis
-                </Button>
-              )}
-            </div>
+          )}
+        </div>
+      )}
+      {(error || plan.error) && (
+        <p role="status" className="px-3 py-2 text-xs text-ink-soft">
+          {error || plan.error}
+        </p>
+      )}
+    </article>
+  );
+}
+export function MeetingsPage() {
+  const [view, setView] = useState<MeetingView>(),
+    [adding, setAdding] = useState(false),
+    [error, setError] = useState("");
+  const native = isNativeDesktop();
+  const reload = useCallback(async () => {
+    setView(await meetings());
+    setError("");
+  }, []);
+  useEffect(() => {
+    if (!native) return;
+    let mounted = true;
+    const read = () =>
+      meetings()
+        .then((data) => {
+          if (mounted) {
+            setView(data);
+            setError("");
+          }
+        })
+        .catch((e) => {
+          if (mounted) setError(message(e));
+        });
+    void read();
+    const timer = setInterval(() => {
+      if (document.visibilityState === "visible") void read();
+    }, 3500);
+    return () => {
+      mounted = false;
+      clearInterval(timer);
+    };
+  }, [native]);
+  return (
+    <div className="space-y-5">
+      <PageHeader
+        title="Meetings"
+        actions={
+          <div className="flex items-center gap-1">
+            <QuietIcon
+              label="Meeting settings"
+              icon={Settings2}
+              onClick={() => {
+                window.location.hash = "/settings/meetings";
+              }}
+            />
+            <QuietIcon
+              label={adding ? "Close meeting picker" : "Schedule a meeting"}
+              icon={adding ? X : CalendarPlus}
+              aria-expanded={adding}
+              disabled={!view}
+              onClick={() => {panelSound(adding);setAdding(!adding);}}
+            />
           </div>
-        </Card>
-      </section>
-
-      <InlineNotice tone="info" title="Fixture isolation">
-        These states are interface-only examples. They are not imported as
-        meeting data and cannot satisfy capture, recovery, or privacy evidence.
-      </InlineNotice>
+        }
+      />
+      {error && <p role="alert">{error}</p>}
+      {adding && view && (
+        <AddMeeting
+          view={view}
+          done={async () => {
+            await reload();
+            setAdding(false);
+          }}
+        />
+      )}
+      {view?.plans.length ? (
+        <div className="vyrra-transcript-list">
+          {view.plans.map((p) => (
+            <MeetingRow key={p.key} plan={p} reload={reload} />
+          ))}
+        </div>
+      ) : native && !view && !error ? (
+        <p role="status">Loading meetings…</p>
+      ) : (
+        <EmptyState
+          icon={<CalendarDays size={22} />}
+          title="No meetings yet"
+          description="Choose a calendar call to take notes."
+        />
+      )}
     </div>
+  );
+}
+export function MeetingIndicator() {
+  const [phase, setPhase] = useState("opening");
+  useEffect(() => {
+    let mounted = true;
+    const read = () =>
+      void invoke<string>("meeting_indicator_phase")
+        .then((p) => {
+          if (mounted) setPhase(p);
+        })
+        .catch(() => {});
+    read();
+    const id = setInterval(read, 600);
+    return () => {
+      mounted = false;
+      clearInterval(id);
+    };
+  }, []);
+  return (
+    <main className="flex h-screen items-center justify-between gap-2 bg-surface px-3 text-ink">
+      <Calendar size={18} />
+      <span role="status" className="text-sm font-medium">
+        {phase === "taking_notes" ? "Taking meeting notes" : "Opening meeting"}
+      </span>
+      <QuietIcon
+        label="Stop meeting notes"
+        icon={Check}
+        onClick={() => void invoke("meeting_stop_active")}
+      />
+    </main>
   );
 }

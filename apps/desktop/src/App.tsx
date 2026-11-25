@@ -4,12 +4,14 @@ import { AppShell } from "./components/AppShell";
 import { routeFromHash, type RouteId } from "./lib/navigation";
 import { CapturePage } from "./pages/CapturePage";
 import { LibraryPage } from "./pages/LibraryPage";
+import { MeetingsPage } from "./pages/MeetingsPage";
 import { SettingsPage } from "./pages/SettingsPage";
 
 const routeTitles: Record<RouteId, string> = {
   capture: "Dictate",
   library: "Library",
   settings: "Settings",
+  meetings: "Meetings",
 };
 
 function useHashRoute(): RouteId {
@@ -32,6 +34,7 @@ function CurrentPage({ route }: { route: RouteId }) {
       return <CapturePage />;
     case "library":
       return <LibraryPage />;
+    case "meetings": return <MeetingsPage />;
     case "settings":
       return <SettingsPage />;
     default:
