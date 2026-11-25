@@ -1,0 +1,2 @@
+[env]
+CMAKE_PROJECT_ggml_INCLUDE = { value = "scripts/portable-ggml.cmake", relative = true }

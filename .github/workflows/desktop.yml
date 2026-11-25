@@ -40,6 +40,19 @@ jobs:
       - run: pnpm --filter @private-voice/desktop build
       - run: cargo test --locked --manifest-path apps/desktop/src-tauri/Cargo.toml
       - run: pnpm --filter @private-voice/desktop exec tauri build --bundles ${{ matrix.bundle }}
+      - name: Check the packaged speech engine uses the x86-64 baseline
+        shell: python {0}
+        run: |
+          import pathlib, re
+          build = pathlib.Path('apps/desktop/src-tauri/target/release/build')
+          caches = list(build.glob('whisper-rs-sys-*/out/build/CMakeCache.txt'))
+          if not caches:
+              raise SystemExit('Missing speech engine build configuration')
+          for cache in caches:
+              flags = dict(re.findall(r'^GGML_(\w+):BOOL=(\w+)$', cache.read_text(encoding='utf-8'), re.M))
+              for feature in 'NATIVE SSE42 AVX AVX2 FMA F16C BMI2 AVX_VNNI AVX512 AVX512_VBMI AVX512_VNNI AVX512_BF16 AMX_TILE AMX_INT8 AMX_BF16'.split():
+                  if flags.get(feature) != 'OFF':
+                      raise SystemExit(f'{cache}: expected GGML_{feature}=OFF, found {flags.get(feature)}')
       - name: Install Linux package on a clean Ubuntu image
         if: runner.os == 'Linux'
         run: |
