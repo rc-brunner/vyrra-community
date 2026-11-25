@@ -43,9 +43,34 @@ def select_wav():
         ["xdotool", "search", "--sync", "--onlyvisible", "--name", title],
         capture_output=True, check=True, timeout=45, text=True,
     ).stdout.splitlines()[-1]
-    subprocess.run(["xdotool", "windowfocus", "--sync", picker, "key", "--clearmodifiers", "ctrl+l"], check=True)
-    subprocess.run(["xdotool", "type", "--clearmodifiers", os.environ["VYRRA_TEST_WAV"]], check=True)
-    subprocess.run(["xdotool", "key", "--clearmodifiers", "Return"], check=True)
+    chooser = find("Transcribe audio on this device", wait=15, enabled=False)
+    find("Select", wait=15, enabled=False)
+    subprocess.run(["xdotool", "windowactivate", "--sync", picker], check=True)
+    subprocess.run(["xdotool", "key", "--clearmodifiers", "ctrl+l"], check=True)
+    deadline = time.monotonic() + 15
+    while time.monotonic() < deadline:
+        queue = [chooser]
+        while queue:
+            element = queue.pop(0)
+            try:
+                state = element.getState()
+                if state.contains(pyatspi.STATE_FOCUSED) and state.contains(pyatspi.STATE_EDITABLE):
+                    target = os.environ["VYRRA_TEST_WAV"]
+                    element.queryEditableText().setTextContents(target)
+                    if element.queryText().getText(0, -1) != target:
+                        raise AssertionError("The native file chooser did not accept the fixture path.")
+                    print("Verified the fixture path in the focused GTK location entry.")
+                    press("Select")
+                    time.sleep(.7)
+                    visible = subprocess.run(["xdotool", "search", "--onlyvisible", "--name", title], capture_output=True)
+                    if visible.returncode == 0:
+                        subprocess.run(["xdotool", "key", "--clearmodifiers", "Return"], check=True)
+                    return
+                queue.extend(element.getChildAtIndex(i) for i in range(element.childCount))
+            except (RuntimeError, LookupError, AttributeError):
+                continue
+        time.sleep(.15)
+    raise RuntimeError("GTK did not focus its location entry.")
 
 try:
     press("Models")

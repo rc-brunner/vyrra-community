@@ -23,8 +23,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          run=45574519356
-          rev=b64c409dd91661d7904f93316e0f9164e714d2bb
+          run=45576690463
+          rev=a77ac3c6acc6d4542bab836b652ce893d5ffe452
           [[ "$(gh run view "$run" -R "$GITHUB_REPOSITORY" --json headSha --jq .headSha)" = "$rev" ]]
           artifact="vyrra-${RUNNER_OS}-x64"
           for attempt in {1..135}; do
@@ -93,14 +93,15 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update -qq
-          sudo apt-get install -y ./package/*.deb xvfb xauth dbus-x11 at-spi2-core python3-pyatspi xdotool xdg-desktop-portal-gtk zenity
+          sudo apt-get install -y ./package/*.deb xvfb xauth dbus-x11 at-spi2-core python3-pyatspi xdotool xdg-desktop-portal-gtk zenity openbox
           export VYRRA_TEST_WAV="$RUNNER_TEMP/test-speech.wav"
           curl --fail --location --retry 3 --silent --show-error 'https://raw.githubusercontent.com/ggml-org/whisper.cpp/adf50b68c113a4db234a2711bc678a92cb13b8a2/samples/jfk.wav' -o "$VYRRA_TEST_WAV"
           echo "59dfb9a4acb36fe2a2affc14bacbee2920ff435cb13cc314a08c13f66ba7860e  $VYRRA_TEST_WAV" | sha256sum -c -
           export NO_AT_BRIDGE=0 GTK_MODULES=atk-bridge XDG_CURRENT_DESKTOP=GNOME
           dbus-run-session -- xvfb-run -a bash -ec '
             dbus-update-activation-environment DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP NO_AT_BRIDGE GTK_MODULES
+            openbox > "$RUNNER_TEMP/window-manager.log" 2>&1 &
             gsettings set org.gnome.desktop.interface toolkit-accessibility true
             gdbus call --session --dest org.a11y.Bus --object-path /org/a11y/bus --method org.freedesktop.DBus.Properties.Set org.a11y.Status IsEnabled "<true>"
-            /usr/bin/python3 apps/desktop/store-preview/linux-catalog.py
+            /usr/bin/python3 -u apps/desktop/store-preview/linux-catalog.py
           '
