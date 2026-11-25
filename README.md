@@ -19,6 +19,8 @@ Install Node as specified in `.node-version`, pnpm 10.14.0, the Rust toolchain i
 
 The desktop app includes a microphone, push-to-talk and hands-free shortcuts, WAV import, a personal dictionary, spoken snippets, and an editable local transcript library. Allow macOS microphone access for dictation and Accessibility access for insertion into other apps. A transcript remains available to copy when insertion is unavailable.
 
+Read how the Windows app handles audio, saved transcripts, model downloads and optional meeting participants in [Windows privacy](docs/windows-privacy.md).
+
 ## Meetings and feedback
 
 Choose an accepted calendar call to open locally, or schedule a named participant on your own Attendee server. Choose a participant picture under **Settings → Meetings**. The local writing model supports summaries and transcript questions. Core dictation stays free and uncapped. See the setup and platform limits in the [meeting guide](docs/meetings.md).
