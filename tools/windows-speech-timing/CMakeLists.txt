@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.18)
+project(vyrra_speech_timing C CXX)
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../../whisper-rs-sys-0.15.0/whisper.cpp" whisper-build)
+add_executable(speech-timing timing.cpp)
+target_link_libraries(speech-timing PRIVATE whisper)

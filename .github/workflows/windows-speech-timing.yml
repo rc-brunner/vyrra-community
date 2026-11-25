@@ -1,0 +1,50 @@
+name: Measure native x64 speech recognition
+on:
+  push:
+    branches: [release/windows-store-media]
+    paths: ['.github/workflows/windows-speech-timing.yml', 'tools/windows-speech-timing/**']
+permissions:
+  contents: read
+jobs:
+  timing:
+    strategy:
+      fail-fast: false
+      matrix:
+        avx2: ['OFF', 'ON']
+    runs-on: windows-2022
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Download the same pinned source and model used by the desktop app
+        shell: pwsh
+        run: |
+          $checksum = (python -c "import tomllib;print(next(x['checksum'] for x in tomllib.load(open('apps/desktop/src-tauri/Cargo.lock','rb'))['package'] if x['name']=='whisper-rs-sys'))").Trim()
+          curl.exe --fail --location --retry 3 --silent --show-error https://static.crates.io/crates/whisper-rs-sys/whisper-rs-sys-0.15.0.crate -o source.tar.gz
+          if ((Get-FileHash source.tar.gz).Hash -ne $checksum) { throw 'Source does not match Cargo.lock.' }
+          tar -xzf source.tar.gz
+          curl.exe --fail --location --retry 3 --silent --show-error 'https://huggingface.co/ggerganov/whisper.cpp/resolve/5359861c739e955e79d9a303bcbc70fb988958b1/ggml-base.bin' -o model.bin
+          if ((Get-FileHash model.bin).Hash -ne '60ed5bc3dd14eea856493d334349b405782ddcaf0028d4b5df4088345fba2efe') { throw 'Speech model verification failed.' }
+      - name: Prepare the six-second fixture and measure the native engine
+        shell: powershell
+        env:
+          AVX2: ${{ matrix.avx2 }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Get-CimInstance Win32_Processor | Select-Object -ExpandProperty Name
+          Add-Type -AssemblyName System.Speech
+          $speech = [System.Speech.Synthesis.SpeechSynthesizer]::new()
+          $format = [System.Speech.AudioFormat.SpeechAudioFormatInfo]::new(16000,[System.Speech.AudioFormat.AudioBitsPerSample]::Sixteen,[System.Speech.AudioFormat.AudioChannel]::Mono)
+          try {
+            $speech.SetOutputToWaveFile("$pwd/notebook.wav", $format)
+            $speech.Speak('I left the blue notebook on the kitchen table. Could you bring it to the design review tomorrow?')
+          } finally { $speech.Dispose() }
+          python -c "import struct,wave; w=wave.open('notebook.wav'); assert w.getframerate()==16000 and w.getnchannels()==1; a=[s[0]/32768 for s in struct.iter_unpack('<h',w.readframes(w.getnframes()))]; open('speech.f32','wb').write(struct.pack('<'+str(len(a))+'f',*a));print('Sample',len(a)/16000,'seconds')"
+          cmake -S tools/windows-speech-timing -B native -A x64 -DGGML_NATIVE=OFF -DGGML_SSE42=OFF -DGGML_AVX=OFF -DGGML_AVX2=$env:AVX2 -DGGML_AVX512=OFF -DGGML_BMI2=OFF -DGGML_FMA=OFF -DGGML_F16C=OFF -DGGML_OPENMP=OFF -DBUILD_SHARED_LIBS=OFF -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          cmake --build native --config Release --target speech-timing --parallel 4
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $program = Get-ChildItem native -Recurse -Filter speech-timing.exe | Select-Object -First 1
+          & $program.FullName model.bin speech.f32
+          exit $LASTEXITCODE
