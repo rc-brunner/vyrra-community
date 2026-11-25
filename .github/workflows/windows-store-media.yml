@@ -60,12 +60,25 @@ jobs:
           if ($app.Count -ne 1) { throw 'Installed application is missing.' }
           # Only this test process on the disposable runner enables WebView2 inspection.
           $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS = '--remote-debugging-port=9222 --remote-debugging-address=127.0.0.1'
+          Get-CimInstance Win32_Processor | Select-Object -ExpandProperty Name
+          $started = Get-Date
           $window = Start-Process $app[0].FullName -PassThru
           try {
             node apps/desktop/store-preview/capture.mjs
             if ($LASTEXITCODE) { throw 'The native app did not complete the Store preview.' }
           } finally {
-            if (-not $window.HasExited) { Stop-Process -Id $window.Id }
+            $window.Refresh()
+            if ($window.HasExited) {
+              Write-Output ('Vyrra exited with native status 0x{0:X8}.' -f $window.ExitCode)
+              Start-Sleep -Seconds 3
+              $events = Get-WinEvent -FilterHashtable @{ LogName = 'Application'; StartTime = $started; Id = 1000,1001,1026 } -ErrorAction SilentlyContinue
+              foreach ($event in $events | Where-Object { $_.Message -match 'vyrra' }) {
+                $event.Message -split "`n" | Where-Object { $_ -match 'faulting application name|faulting module name|exception code|fault offset|event name|^P[1-9]:' }
+              }
+            } else {
+              Write-Output 'Vyrra was still running when the renderer check ended.'
+              Stop-Process -Id $window.Id
+            }
           }
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()

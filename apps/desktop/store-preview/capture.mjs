@@ -26,6 +26,7 @@ try {
   });
   await expect.poll(() => Boolean(appWindow()), { timeout: 30000 }).toBe(true);
   const page = appWindow();
+  page.on("crash", () => console.log("Windows WebView2 reported a renderer crash."));
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.bringToFront();
   await expect(page.getByRole("heading", { name: "Speak naturally." })).toBeVisible();
