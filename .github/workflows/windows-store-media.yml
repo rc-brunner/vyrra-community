@@ -16,8 +16,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { image: windows-2022, sample: a }
-          - { image: windows-2022, sample: b }
           - { image: windows-2025, sample: c }
     runs-on: ${{ matrix.image }}
     timeout-minutes: 15
@@ -70,6 +68,7 @@ jobs:
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
+          PREVIEW_IMAGE: ${{ matrix.image }}
         run: |
           $ErrorActionPreference = 'Stop'
           $run = '45553046930'
@@ -99,8 +98,12 @@ jobs:
           $launch.UseShellExecute = $false
           $window = [Diagnostics.Process]::Start($launch)
           try {
-            node apps/desktop/store-preview/capture.mjs
-            if ($LASTEXITCODE) { throw 'The native app did not complete the Store preview.' }
+            if ($env:PREVIEW_IMAGE -eq 'windows-2025') {
+              & ./apps/desktop/store-preview/native-dictation.ps1 -WindowProcessId $window.Id
+            } else {
+              node apps/desktop/store-preview/capture.mjs
+              if ($LASTEXITCODE) { throw 'The native app did not complete the Store preview.' }
+            }
           } finally {
             $window.Refresh()
             if ($window.HasExited) {
