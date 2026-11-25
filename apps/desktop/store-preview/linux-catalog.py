@@ -19,7 +19,8 @@ def find(name, wait=90, enabled=True):
                 label = element.name
                 if label:
                     last.append(label)
-                if label == name and (not enabled or element.getState().contains(pyatspi.STATE_ENABLED)):
+                matches = name(label or "") if callable(name) else label == name
+                if matches and (not enabled or element.getState().contains(pyatspi.STATE_ENABLED)):
                     return element
                 queue.extend(element.getChildAtIndex(i) for i in range(element.childCount))
             except (RuntimeError, LookupError, AttributeError):
@@ -35,6 +36,17 @@ def press(name):
                 raise RuntimeError(f"Action failed: {name}")
             return
     raise RuntimeError(f"No activation action on {name}")
+
+def select_wav():
+    title = "^Transcribe audio on this device$"
+    picker = subprocess.run(
+        ["xdotool", "search", "--sync", "--onlyvisible", "--name", title],
+        capture_output=True, check=True, timeout=45, text=True,
+    ).stdout.splitlines()[-1]
+    subprocess.run(["xdotool", "windowfocus", "--sync", picker, "key", "--clearmodifiers", "ctrl+l"], check=True)
+    subprocess.run(["xdotool", "type", "--clearmodifiers", os.environ["VYRRA_TEST_WAV"]], check=True)
+    subprocess.run(["xdotool", "key", "--clearmodifiers", "Return"], check=True)
+
 try:
     press("Models")
     press("Download Whisper Tiny, Multilingual")
@@ -46,6 +58,19 @@ try:
     press("Dictate")
     find("Start dictation")
     print("Verified installation, model downloads, switching, and ready recorder through native GTK accessibility.")
+    press("More audio options")
+    press("Transcribe WAV")
+    select_wav()
+    transcript = find("Transcript", 240)
+    value = transcript.queryText().getText(0, -1).lower()
+    if "country" not in value or "ask" not in value:
+        raise RuntimeError(f"Unexpected public speech sample transcript: {value}")
+    print("Decoded the public speech fixture through the installed app's file picker.")
+    press("Save to Library")
+    find("Saved on this device.", enabled=False)
+    press("Library")
+    find(lambda label: "country" in label.lower() and "ask" in label.lower(), enabled=False)
+    print("Verified the saved native transcript in the Linux library.")
 finally:
     app.terminate()
     app.wait(timeout=10)
