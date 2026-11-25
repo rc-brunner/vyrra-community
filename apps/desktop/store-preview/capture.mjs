@@ -47,11 +47,12 @@ try {
   await capture("04-ready.png");
   await page.getByRole("button", { name: "More audio options" }).click();
   await page.getByRole("button", { name: "Transcribe WAV" }).click();
+  const decodeStarted = Date.now();
   execFileSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-File", chooseFile, audio], { stdio: "inherit", timeout: 45000 });
   const transcript = page.getByRole("textbox", { name: "Transcript", exact: true });
   await expect(transcript).toHaveValue(/blue notebook/i, { timeout: 90000 });
   await expect(transcript).toHaveValue(/design review/i);
-  console.log("The Windows release transcribed the blue notebook and design review phrases.");
+  console.log(`The Windows release transcribed the blue notebook and design review phrases in ${((Date.now() - decodeStarted) / 1000).toFixed(1)} seconds including file selection.`);
   await capture("01-dictation.png");
   await page.getByRole("button", { name: "Save to Library" }).click();
   await expect(page.getByText("Saved on this device.")).toBeVisible();

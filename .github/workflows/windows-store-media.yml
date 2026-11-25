@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [windows-2022, windows-2025]
+        image: [windows-2025]
     runs-on: ${{ matrix.image }}
     timeout-minutes: 15
     steps:
@@ -103,7 +103,14 @@ jobs:
               }
             } else {
               Write-Output "Vyrra remained running with window title '$($window.MainWindowTitle)'."
-              Get-Process msedgewebview2 -ErrorAction SilentlyContinue | Group-Object ProcessName | Select-Object Name,Count
+              Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes
+              $root = [Windows.Automation.AutomationElement]::FromHandle($window.MainWindowHandle)
+              $nodes = $root.FindAll([Windows.Automation.TreeScope]::Descendants, [Windows.Automation.Condition]::TrueCondition)
+              Write-Output "Native accessibility tree contains $($nodes.Count) elements."
+              $nodes | Select-Object -First 24 | ForEach-Object { Write-Output "$($_.Current.ControlType.ProgrammaticName) $($_.Current.Name)" }
+              $browsers = @(Get-Process msedgewebview2 -ErrorAction SilentlyContinue)
+              Write-Output "WebView2 processes: $($browsers.Count)"
+              Get-ChildItem "${env:ProgramFiles(x86)}\Microsoft\EdgeWebView\Application" -Filter msedgewebview2.exe -Recurse -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
               Stop-Process -Id $window.Id
             }
           }
