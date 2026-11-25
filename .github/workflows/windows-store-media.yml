@@ -29,6 +29,28 @@ jobs:
         run: |
           npm install --global pnpm@10.14.0
           pnpm install --frozen-lockfile --ignore-scripts
+      - name: Provision the WebView2 dependency declared in the Store manifest
+        shell: pwsh
+        run: |
+          $client = 'Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}'
+          $keys = @("HKLM:\SOFTWARE\WOW6432Node\$client", "HKCU:\SOFTWARE\$client")
+          function Get-WebViewVersion {
+            foreach ($key in $keys) {
+              $version = Get-ItemPropertyValue $key -Name pv -ErrorAction SilentlyContinue
+              if ($version -and [version]$version -gt [version]'0.0.0.0') { return $version }
+            }
+          }
+          $version = Get-WebViewVersion
+          if (-not $version) {
+            $installer = Join-Path $env:RUNNER_TEMP 'MicrosoftEdgeWebview2Setup.exe'
+            Invoke-WebRequest 'https://go.microsoft.com/fwlink/p/?LinkId=2124703' -OutFile $installer
+            $signature = Get-AuthenticodeSignature $installer
+            if ($signature.Status -ne 'Valid' -or $signature.SignerCertificate.Subject -notmatch 'O=Microsoft Corporation') { throw 'The Microsoft runtime signature is invalid.' }
+            $result = Start-Process $installer -ArgumentList '/silent','/install' -Wait -PassThru
+            $version = Get-WebViewVersion
+            if (-not $version) { throw "Microsoft WebView2 installation returned $($result.ExitCode) without registering a runtime." }
+          }
+          Write-Output "Microsoft WebView2 runtime $version"
       - name: Synthesize a non-personal sample WAV on the test machine
         shell: powershell
         run: |
@@ -80,7 +102,8 @@ jobs:
                 $event.Message -split "`n" | Where-Object { $_ -match 'faulting application name|faulting module name|exception code|fault offset|event name|^P[1-9]:' }
               }
             } else {
-              Write-Output 'Vyrra was still running when the renderer check ended.'
+              Write-Output "Vyrra remained running with window title '$($window.MainWindowTitle)'."
+              Get-Process msedgewebview2 -ErrorAction SilentlyContinue | Group-Object ProcessName | Select-Object Name,Count
               Stop-Process -Id $window.Id
             }
           }
