@@ -9,9 +9,9 @@ Vyrra is a free, local-first voice keyboard for iPhone and Android and a desktop
 | iPhone | [App Store](https://apps.apple.com/app/id6793320385) |
 | Android 12 and later | [Signed APK preview](https://github.com/rc-brunner/vyrra-community/releases/download/android-v0.1.0-alpha01/Vyrra-Android.apk) |
 | Apple silicon Mac, macOS 13 and later | [Notarized desktop preview](https://github.com/rc-brunner/vyrra-community/releases/download/macos-v0.1.0/Vyrra-macOS-Apple-Silicon.zip) |
-| Ubuntu 24.04, Intel or AMD 64-bit | [Desktop preview (.deb)](https://github.com/rc-brunner/vyrra-community/releases/download/linux-v0.1.0/Vyrra-Linux-x86_64.deb) |
+| Ubuntu 24.04, Intel or AMD 64-bit | [Desktop 0.1.1 preview (.deb)](https://github.com/rc-brunner/vyrra-community/releases/download/linux-v0.1.1/Vyrra-Linux-x86_64.deb) |
 
-If you install the direct Android APK, use GitHub for updates. The Google Play edition uses a different signing certificate. On Linux, copy transcripts from the library. See the [Linux release notes](https://github.com/rc-brunner/vyrra-community/releases/tag/linux-v0.1.0) for the supported features and installation steps.
+If you install the direct Android APK, use GitHub for updates. The Google Play edition uses a different signing certificate. On Linux, copy transcripts from the library. See the [Linux release notes](https://github.com/rc-brunner/vyrra-community/releases/tag/linux-v0.1.1) for the supported features and installation steps.
 
 ## Desktop
 
