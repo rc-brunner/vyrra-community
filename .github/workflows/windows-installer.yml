@@ -1,0 +1,67 @@
+name: Test packaged Windows installer
+on:
+  workflow_dispatch:
+    inputs:
+      build_run:
+        description: Desktop checks run with verified packages
+        required: true
+        type: string
+permissions:
+  actions: read
+  attestations: read
+  contents: read
+
+jobs:
+  install:
+    runs-on: windows-2022
+    timeout-minutes: 12
+    steps:
+      - name: Verify the installer from the selected native build
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD_RUN: ${{ inputs.build_run }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($env:GITHUB_REF -ne 'refs/heads/main' -or $env:BUILD_RUN -notmatch '^\d+$') { throw 'Select a native build from main.' }
+          gh run download $env:BUILD_RUN --repo $env:GITHUB_REPOSITORY --name vyrra-Windows-x64 --dir package
+          if ($LASTEXITCODE -ne 0) { throw 'Could not download the Windows package.' }
+          $files = @(Get-ChildItem package -Filter '*_x64-setup.exe' -File)
+          if ($files.Count -ne 1) { throw 'Expected a single x64 installer.' }
+          Move-Item $files[0].FullName package/Vyrra-Windows-x64.exe
+          $predicate = "https://github.com/$env:GITHUB_REPOSITORY/attestations/desktop-verification/v1"
+          $proof = gh attestation verify package/Vyrra-Windows-x64.exe --repo $env:GITHUB_REPOSITORY --predicate-type $predicate --signer-workflow "$env:GITHUB_REPOSITORY/.github/workflows/desktop-provenance.yml" --format json
+          if ($LASTEXITCODE -ne 0) { throw 'Installer verification failed.' }
+          $nativeRun = "https://github.com/$env:GITHUB_REPOSITORY/actions/runs/$env:BUILD_RUN"
+          $verified = ($proof | ConvertFrom-Json) | Where-Object { $_.verificationResult.statement.predicate.run -eq $nativeRun }
+          if (-not $verified) { throw 'The attestation does not identify the selected build.' }
+
+      - name: Install and open the packaged application
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $destination = Join-Path $env:RUNNER_TEMP 'vyrra-installed'
+          $installer = Start-Process package/Vyrra-Windows-x64.exe -ArgumentList '/S',"/D=$destination" -Wait -PassThru
+          if ($installer.ExitCode -ne 0) { throw "Installation failed with exit code $($installer.ExitCode)." }
+          $app = @(Get-ChildItem $destination -File -Filter '*.exe' | Where-Object { $_.BaseName -match '^Vyrra[- ]Desktop$' })
+          if ($app.Count -ne 1) { throw 'The installer did not produce the desktop executable.' }
+          $process = Start-Process $app[0].FullName -PassThru
+          try {
+            Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes
+            $primary = [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::NameProperty, 'Library')
+            $deadline = [DateTime]::UtcNow.AddSeconds(60)
+            do {
+              Start-Sleep -Milliseconds 500
+              $process.Refresh()
+              if ($process.HasExited) { throw "Vyrra exited with code $($process.ExitCode)." }
+              if ($process.MainWindowHandle -ne 0 -and $process.MainWindowTitle -eq 'Vyrra Desktop') {
+                $window = [Windows.Automation.AutomationElement]::FromHandle($process.MainWindowHandle)
+                $library = $window.FindFirst([Windows.Automation.TreeScope]::Descendants, $primary)
+                if ($null -ne $library) { break }
+              }
+            } while ([DateTime]::UtcNow -lt $deadline)
+            if ($null -eq $library) { throw 'The installed desktop app did not render its Library navigation.' }
+            Write-Output 'Installed Vyrra Desktop and found its Library navigation in the running window.'
+          } finally {
+            if (-not $process.HasExited) { Stop-Process -Id $process.Id }
+          }
