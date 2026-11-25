@@ -29,9 +29,11 @@ function Wait-Control([string]$name, [int]$seconds = 60, [string]$role = '') {
                 if ($null -ne $control -and $control.Current.IsEnabled) { return $control }
             }
         } catch {
-            # Closing the native file picker briefly replaces the UI Automation root.
+            # Closing the native file picker can disconnect its UI Automation provider.
+            # The next poll reacquires the live application window.
             $cause = $_.Exception.GetBaseException()
-            if ($cause -isnot [Windows.Automation.ElementNotAvailableException] -and $cause.HResult -ne -2147220991) { throw }
+            if ($cause -isnot [Windows.Automation.ElementNotAvailableException] -and
+                $cause.HResult.ToString('X8') -notin @('80040201', '80010012', '80010108')) { throw }
         }
         Start-Sleep -Milliseconds 350
     } while ([DateTime]::UtcNow -lt $deadline)
