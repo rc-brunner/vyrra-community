@@ -1,0 +1,64 @@
+name: Verify desktop packages
+on:
+  workflow_run:
+    workflows: [Desktop checks]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      build_run:
+        description: Successful Desktop checks run on main
+        type: string
+        required: true
+permissions: {}
+jobs:
+  attest:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: read
+      attestations: write
+      id-token: write
+    steps:
+      - name: Check the native build and retrieve its unchanged packages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD_RUN: ${{ inputs.build_run || github.event.workflow_run.id }}
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_REF" == refs/heads/main && "$BUILD_RUN" =~ ^[0-9]+$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN" > "$RUNNER_TEMP/build.json"
+          jq -e --arg repository "$GITHUB_REPOSITORY" '
+            .conclusion == "success" and .head_repository.full_name == $repository
+            and .head_branch == "main" and .path == ".github/workflows/desktop.yml"
+            and (.event == "push" or .event == "workflow_dispatch")
+          ' "$RUNNER_TEMP/build.json" > /dev/null
+          mkdir packages
+          for platform in Linux Windows; do
+            gh run download "$BUILD_RUN" --repo "$GITHUB_REPOSITORY" \
+              --name "vyrra-$platform-x64" --dir "$RUNNER_TEMP/$platform"
+          done
+          shopt -s nullglob
+          linux_packages=("$RUNNER_TEMP/Linux/"*_amd64.deb)
+          windows_packages=("$RUNNER_TEMP/Windows/"*_x64-setup.exe)
+          [[ ${#linux_packages[@]} == 1 && ${#windows_packages[@]} == 1 ]]
+          cp "${linux_packages[0]}" packages/Vyrra-Linux-x86_64.deb
+          cp "${windows_packages[0]}" packages/Vyrra-Windows-x64.exe
+          jq --arg repo "$GITHUB_REPOSITORY" '{
+            buildDefinition: {
+              buildType: "https://github.com/actions/runner",
+              externalParameters: {workflow: {repository: ("https://github.com/" + $repo),
+                ref: "refs/heads/main", path: .path}},
+              internalParameters: {},
+              resolvedDependencies: [{uri: ("git+https://github.com/" + $repo + "@refs/heads/main"),
+                digest: {gitCommit: .head_sha}}]
+            },
+            runDetails: {builder: {id: ("https://github.com/" + $repo + "/" + .path + "@refs/heads/main")},
+              metadata: {invocationId: .html_url}}
+          }' "$RUNNER_TEMP/build.json" > provenance.json
+      - name: Sign package provenance with the repository identity
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6
+        with:
+          subject-path: packages/*
+          predicate-type: https://slsa.dev/provenance/v1
+          predicate-path: provenance.json
