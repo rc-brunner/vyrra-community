@@ -16,7 +16,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { image: windows-2025, sample: c }
+          - { image: windows-2022, sample: a }
+          - { image: windows-2022, sample: b }
     runs-on: ${{ matrix.image }}
     timeout-minutes: 15
     steps:
@@ -119,7 +120,8 @@ jobs:
               $root = [Windows.Automation.AutomationElement]::FromHandle($window.MainWindowHandle)
               $nodes = $root.FindAll([Windows.Automation.TreeScope]::Descendants, [Windows.Automation.Condition]::TrueCondition)
               Write-Output "Native accessibility tree contains $($nodes.Count) elements."
-              $nodes | Select-Object -First 24 | ForEach-Object { Write-Output "$($_.Current.ControlType.ProgrammaticName) $($_.Current.Name)" }
+              $nodes | Select-Object -First 90 | ForEach-Object { Write-Output "$($_.Current.ControlType.ProgrammaticName) $($_.Current.Name)" }
+              Write-Output "Native processor time: $($window.TotalProcessorTime.TotalSeconds) seconds; private memory: $($window.PrivateMemorySize64) bytes"
               $browsers = @(Get-Process msedgewebview2 -ErrorAction SilentlyContinue)
               Write-Output "WebView2 processes: $($browsers.Count)"
               foreach ($browser in Get-CimInstance Win32_Process -Filter "Name='msedgewebview2.exe'") {

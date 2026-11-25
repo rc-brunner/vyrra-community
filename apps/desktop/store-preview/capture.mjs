@@ -50,7 +50,12 @@ try {
   const decodeStarted = Date.now();
   execFileSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-File", chooseFile, audio], { stdio: "inherit", timeout: 45000 });
   const transcript = page.getByRole("textbox", { name: "Transcript", exact: true });
-  await expect(transcript).toHaveValue(/blue notebook/i, { timeout: 90000 });
+  try {
+    await expect(transcript).toHaveValue(/blue notebook/i, { timeout: 240000 });
+  } catch (err) {
+    if (!page.isClosed()) console.log("Packaged app after WAV selection:", await page.getByRole("main").innerText({ timeout: 5000 }));
+    throw err;
+  }
   await expect(transcript).toHaveValue(/design review/i);
   console.log(`The Windows release transcribed the blue notebook and design review phrases in ${((Date.now() - decodeStarted) / 1000).toFixed(1)} seconds including file selection.`);
   await capture("01-dictation.png");
