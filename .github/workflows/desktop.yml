@@ -4,6 +4,7 @@ permissions:
   contents: read
 jobs:
   desktop:
+    if: github.ref != 'refs/heads/release/windows-store-media'
     name: ${{ matrix.name }}
     strategy:
       fail-fast: false
