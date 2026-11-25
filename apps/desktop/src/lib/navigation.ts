@@ -2,6 +2,7 @@ export const ROUTES = [
   "capture",
   "library",
   "meetings",
+  "models",
   "settings",
 ] as const;
 

@@ -5,6 +5,7 @@ import {
   type ReactNode,
 } from "react";
 import {
+  Box,
   CalendarDays,
   LibraryBig,
   Mic2,
@@ -36,6 +37,7 @@ const navigation = [
   {
     id: "meetings", route: "meetings", label: "Meetings", icon: CalendarDays, href: hrefForRoute("meetings"),
   },
+  { id: "models", route: "models", label: "Models", icon: Box, href: hrefForRoute("models") },
   {
     id: "settings",
     route: "settings",
@@ -67,7 +69,7 @@ function NavigationItems({
         href={href}
         aria-current={active ? "page" : undefined}
         className={cn(
-          "group flex min-h-10 items-center gap-3 rounded-control text-sm font-medium transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-focus",
+          "vyrra-nav group flex items-center gap-2.5 font-medium focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-focus",
           mobile ? "shrink-0 px-3" : "w-full px-3",
           active
             ? "bg-accent-soft text-ink"
@@ -141,7 +143,7 @@ export function AppShell({
         Skip to content
       </a>
 
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[15.5rem] flex-col border-r border-line bg-canvas/95 p-4 backdrop-blur md:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[13rem] flex-col border-r border-line bg-canvas/95 p-3 backdrop-blur md:flex">
         <div className="px-2 pb-5 pt-1">
           <BrandMark />
         </div>
@@ -151,7 +153,7 @@ export function AppShell({
         </nav>
       </aside>
 
-      <div className="md:pl-[15.5rem]">
+      <div className="md:pl-[13rem]">
         <header className="sticky top-0 z-20 border-b border-line bg-canvas/90 px-4 py-3 backdrop-blur-xl sm:px-6 md:hidden">
           <div className="mx-auto flex max-w-[92rem] items-center justify-between gap-4">
             <BrandMark compact />
@@ -163,7 +165,7 @@ export function AppShell({
         <main
           id="main-content"
           tabIndex={-1}
-          className="mx-auto min-h-[calc(100dvh-4.15rem)] max-w-[92rem] px-4 py-7 outline-none sm:px-6 sm:py-9 lg:px-9 lg:py-10"
+          className="mx-auto min-h-[calc(100dvh-4.15rem)] max-w-[92rem] px-4 py-7 outline-none sm:px-6 sm:py-7 lg:px-8 lg:py-8"
         >
           {children}
         </main>

@@ -107,7 +107,7 @@ function SettingsNavigation({ section }: { section: SettingsSection }) {
             href={`#/settings/${id}`}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex min-h-12 shrink-0 items-center gap-3 rounded-control border px-3.5 py-2.5 text-left transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-focus lg:w-full",
+              "vyrra-nav flex shrink-0 items-center gap-2 border px-2.5 py-1 text-left focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-focus lg:w-full",
               active
                 ? "order-first border-accent/35 bg-accent-soft text-ink lg:order-none"
                 : "border-transparent text-ink-soft hover:border-line hover:bg-surface hover:text-ink",
@@ -115,15 +115,15 @@ function SettingsNavigation({ section }: { section: SettingsSection }) {
           >
             <span
               className={cn(
-                "grid size-8 shrink-0 place-items-center rounded-lg",
+                "grid size-5 shrink-0 place-items-center rounded",
                 active
-                  ? "bg-accent text-on-accent"
-                  : "bg-surface-strong text-ink-faint",
+                  ? "text-accent"
+                  : "text-ink-faint",
               )}
             >
               <Icon size={16} aria-hidden="true" />
             </span>
-            <span className="block text-sm font-semibold">{label}</span>
+            <span className="block font-medium">{label}</span>
           </a>
         );
       })}

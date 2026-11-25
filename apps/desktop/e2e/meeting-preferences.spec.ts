@@ -7,6 +7,7 @@ test.beforeEach(async({page})=>{await page.addInitScript(({pic})=>{
     case "meeting_list":return structuredClone(view);
     case "meeting_profile":Object.assign(view.profile,args);return;
     case "meeting_picture":view.profile.image=args.reset?null:"custom";return;
+    case "dictation_models":return {installed:["base"],active:"base",job:null,idle:true};
     case "dictation_options":return structuredClone(prefs);
     case "dictation_set_feedback":Object.assign(prefs,args);return;
     case "dictation_preview_sound":return;

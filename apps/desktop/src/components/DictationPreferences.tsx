@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { SoundPicker } from "./SoundPicker";
 import { Button, Card, PageHeader } from "./ui";
+import { modelStatus, speechModels } from "../lib/models";
 import { isNativeDesktop } from "../lib/native";
 import {
   message,
@@ -15,9 +16,11 @@ const field =
 function PreferencesForm({
   value,
   languages,
+  translationAvailable,
 }: {
   value: SpeechOptions;
   languages: string[][];
+  translationAvailable: boolean;
 }) {
   const [sound, setSound] = useState(value.sound ?? "studio");
   const [panelSounds, setPanelSounds] = useState(value.panelSounds ?? false);
@@ -84,10 +87,12 @@ function PreferencesForm({
           <input
             type="checkbox"
             checked={translate}
+            disabled={!translationAvailable && !translate}
             onChange={(e) => setTranslate(e.target.checked)}
           />{" "}
           Translate speech into English
         </label>
+        {!translationAvailable && <a href="#/models" className="model-route">Choose a multilingual Whisper model with translation.</a>}
       </Card>
       <Card className="space-y-2 p-5">
         <label className="block text-sm font-semibold text-ink">
@@ -175,15 +180,17 @@ export function DictationPreferences() {
   const [data, setData] = useState<{
     options: SpeechOptions;
     languages: string[][];
+    translationAvailable: boolean;
   }>();
   const [error, setError] = useState("");
   const native = isNativeDesktop();
   useEffect(() => {
     if (!native) return;
     let mounted = true;
-    Promise.all([speechOptions(), invoke<string[][]>("dictation_languages")])
-      .then(([options, languages]) => {
-        if (mounted) setData({ options, languages });
+    Promise.all([speechOptions(), invoke<string[][]>("dictation_languages"), modelStatus()])
+      .then(([options, languages, catalog]) => {
+        const active = speechModels.find(model => model.id === catalog.active);
+        if (mounted) setData({ options, languages, translationAvailable: active?.translation ?? true });
       })
       .catch((err) => {
         if (mounted) setError(message(err));
@@ -196,7 +203,7 @@ export function DictationPreferences() {
     <div className="space-y-6">
       <PageHeader title="Dictation" />
       {data ? (
-        <PreferencesForm value={data.options} languages={data.languages} />
+        <PreferencesForm value={data.options} languages={data.languages} translationAvailable={data.translationAvailable} />
       ) : (
         <p role="status" className="text-sm text-ink-soft">
           {error ||

@@ -1,5 +1,5 @@
 use super::{Event, Meetings, Result};
-use crate::dictation::{Dictation, audio::Microphone};
+use crate::dictation::{Dictation, audio::Microphone, catalog::MeetingDecoder};
 use std::{
     sync::atomic::Ordering,
     time::{Duration, Instant},
@@ -99,8 +99,8 @@ fn launch(event: &Event, source: &str) -> Result<()> {
         open::that_detached(&event.url).map_err(|_| "The meeting link could not be opened.")
     }
 }
-fn append(d: &Dictation, label: &str, pcm: Vec<f32>, lines: &mut Vec<String>) -> Result<()> {
-    match d.meeting_text(&pcm) {
+fn append(d: &MeetingDecoder, label: &str, pcm: Vec<f32>, lines: &mut Vec<String>) -> Result<()> {
+    match d.transcribe(&pcm) {
         Ok(s) => lines.push(format!("{label}: {s}")),
         Err("No speech was detected.") => (),
         Err(error) => return Err(error),
@@ -114,10 +114,7 @@ pub fn run(
     source: &str,
     key: &str,
 ) -> Result<()> {
-    let d = app.state::<Dictation>();
-    if !d.meeting_ready() {
-        return Err("Install the local speech model before the meeting starts.");
-    }
+    let d = app.state::<Dictation>().meeting_decoder()?;
     let panel = app
         .get_webview_window("meeting-indicator")
         .ok_or("The meeting indicator is unavailable.")?;

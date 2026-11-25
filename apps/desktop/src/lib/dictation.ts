@@ -17,6 +17,7 @@ export type DictationAction =
   | "cancel"
   | "clear";
 export interface DictationSnapshot {
+  activeModel?: string | null;
   phase: Phase;
   model: "missing" | "checking" | "installing" | "ready";
   elapsedMs: number;
@@ -83,13 +84,14 @@ function refresh(): Promise<void> {
   return pending;
 }
 
-async function poll() {
+let generation = 0;
+async function poll(gate: number) {
   await refresh();
-  if (listeners.size) {
+  if (listeners.size && gate === generation) {
     const active = current.phase !== "idle" || current.model === "installing";
     timer = setTimeout(
       () => {
-        void poll();
+        void poll(gate);
       },
       active ? 125 : 750,
     );
@@ -99,10 +101,10 @@ async function poll() {
 function subscribe(notify: () => void) {
   if (!isNativeDesktop()) return () => {};
   listeners.add(notify);
-  if (listeners.size === 1 && !pending) void poll();
+  if (listeners.size === 1) void poll(++generation);
   return () => {
     listeners.delete(notify);
-    if (!listeners.size) clearTimeout(timer);
+    if (!listeners.size) { generation++; clearTimeout(timer); }
   };
 }
 

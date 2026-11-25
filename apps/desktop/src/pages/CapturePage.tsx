@@ -1,7 +1,10 @@
 import { WritingTools } from "../components/WritingTools";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Bookmark,
+  Box,
+  Download,
+  LoaderCircle,
   ClipboardCopy,
   Ellipsis,
   FileAudio2,
@@ -14,7 +17,7 @@ import {
 
 import { QuietIcon } from "../components/QuietIcon";
 import { RecorderPill } from "../components/RecorderPill";
-import { Button, Card, PageHeader } from "../components/ui";
+import { Button, Card, PageHeader, ShortcutHint } from "../components/ui";
 import {
   dictate,
   importAudio,
@@ -23,6 +26,7 @@ import {
   saveEntry,
   useDictation,
 } from "../lib/dictation";
+import { speechModels } from "../lib/models";
 import { isNativeDesktop } from "../lib/native";
 import { readWaveformSensitivity, readWaveformVariant } from "../lib/waveform";
 
@@ -32,9 +36,6 @@ function elapsed(ms: number) {
     .map((v) => String(v).padStart(2, "0"))
     .join(":");
 }
-
-const actionClass =
-  "grid size-11 place-items-center rounded-full bg-accent text-on-accent transition-colors hover:bg-accent-hover focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:opacity-45";
 
 function Transcript({ text }: { text: string }) {
   const [draft, setDraft] = useState(text);
@@ -116,10 +117,39 @@ export function CapturePage() {
   const [error, setError] = useState("");
   const [choosing, setChoosing] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState(false);
+  const primary = useRef<HTMLButtonElement>(null);
+  const mac = /Mac|iPhone|iPad/.test(navigator.platform);
+  useEffect(() => {
+    const key = (event: KeyboardEvent) => {
+      if (
+        event.key !== "Enter" ||
+        event.repeat ||
+        event.isComposing ||
+        event.altKey ||
+        event.shiftKey ||
+        event.metaKey !== mac ||
+        event.ctrlKey === mac ||
+        !primary.current ||
+        primary.current.disabled ||
+        (event.target instanceof Element &&
+          event.target.closest(
+            "input, textarea, select, [contenteditable=true], [role=dialog], [role=listbox]",
+          ))
+      )
+        return;
+      event.preventDefault();
+      primary.current.click();
+    };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, [mac]);
   const listening = state.phase === "listening";
   const paused = state.phase === "paused";
   const ready = native && state.model === "ready";
   const busy = state.phase !== "idle";
+  const model = speechModels.find((m) => m.id === state.activeModel);
+  const recording = listening || paused;
+  const settingUp = state.model === "installing" || state.model === "checking";
   const label = {
     idle: native && !ready ? "Set up" : "Ready",
     starting: "Starting",
@@ -154,64 +184,49 @@ export function CapturePage() {
             variant={readWaveformVariant()}
             sensitivity={readWaveformSensitivity()}
             action={
-              <div className="flex items-center gap-2">
-                {(listening || paused) && (
+              <div className="recorder-actions flex items-center gap-1">
+                {(!busy || recording) && (
                   <button
+                    ref={primary}
                     type="button"
-                    aria-label="Finish dictation"
-                    title="Finish dictation"
-                    className={actionClass}
-                    onClick={() => void run(() => dictate("finish"))}
-                  >
-                    <Square size={15} fill="currentColor" />
-                  </button>
-                )}
-                {(!busy || listening || paused) && (
-                  <button
-                    type="button"
+                    className="vyrra-button recorder-primary"
                     disabled={!ready || choosing}
                     aria-label={
-                      listening
-                        ? "Pause dictation"
-                        : paused
-                          ? "Resume dictation"
-                          : "Start dictation"
+                      recording ? "Finish dictation" : "Start dictation"
                     }
-                    title={
-                      listening
-                        ? "Pause dictation"
-                        : paused
-                          ? "Resume dictation"
-                          : "Start dictation"
-                    }
-                    className={actionClass}
+                    aria-keyshortcuts={mac ? "Meta+Enter" : "Control+Enter"}
                     onClick={() =>
-                      void run(() =>
-                        dictate(
-                          listening ? "pause" : paused ? "resume" : "start",
-                        ),
-                      )
+                      void run(() => dictate(recording ? "finish" : "start"))
                     }
                   >
-                    {listening ? (
-                      <Pause size={18} />
-                    ) : paused ? (
-                      <Play size={18} />
+                    {recording ? (
+                      <Square
+                        size={13}
+                        fill="currentColor"
+                        aria-hidden="true"
+                      />
                     ) : (
-                      <Mic size={18} />
+                      <Mic size={15} aria-hidden="true" />
                     )}
+                    {recording ? "Finish" : "Dictate"}
+                    <ShortcutHint>{mac ? "⌘ ↵" : "Ctrl ↵"}</ShortcutHint>
                   </button>
                 )}
+                {recording && (
+                  <QuietIcon
+                    label={paused ? "Resume dictation" : "Pause dictation"}
+                    icon={paused ? Play : Pause}
+                    onClick={() =>
+                      void run(() => dictate(paused ? "resume" : "pause"))
+                    }
+                  />
+                )}
                 {busy && (
-                  <button
-                    type="button"
-                    aria-label="Cancel dictation"
-                    title="Cancel dictation"
-                    className="grid size-11 place-items-center rounded-full text-ink-soft hover:bg-surface-strong"
+                  <QuietIcon
+                    label="Cancel dictation"
+                    icon={X}
                     onClick={() => void run(() => dictate("cancel"))}
-                  >
-                    <X size={18} />
-                  </button>
+                  />
                 )}
               </div>
             }
@@ -229,29 +244,41 @@ export function CapturePage() {
                     ? "Checking the local speech model…"
                     : "Installing the speech model…"}
               </p>
-              {state.model === "missing" && (
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    disabled={choosing}
-                    onClick={() => void run(() => installModel(false), true)}
-                  >
-                    Download speech model
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    disabled={choosing}
-                    onClick={() => void run(() => installModel(true), true)}
-                  >
-                    Choose local model
-                  </Button>
-                </div>
-              )}
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  disabled={choosing || settingUp}
+                  aria-busy={settingUp}
+                  className={settingUp ? "vyrra-busy" : ""}
+                  onClick={() => void run(() => installModel(false), true)}
+                >
+                  {settingUp ? (
+                    <LoaderCircle size={14} />
+                  ) : (
+                    <Download size={14} />
+                  )}
+                  Download speech model
+                </Button>
+                <Button
+                  variant="secondary"
+                  disabled={choosing || settingUp}
+                  onClick={() => void run(() => installModel(true), true)}
+                >
+                  Choose local model
+                </Button>
+                <a className="model-route" href="#/models">
+                  <Box size={14} />
+                  Browse models
+                </a>
+              </div>
             </div>
           ) : (
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-xs text-ink-soft">
-                On-device dictation · Free and uncapped
-              </span>
+              <a className="model-route" href="#/models">
+                <Box size={14} />
+                {model
+                  ? `Whisper ${model.name}${model.languages === 1 ? " · English" : ""}`
+                  : "Speech models"}
+              </a>
               <QuietIcon
                 icon={Ellipsis}
                 label="More audio options"
@@ -297,7 +324,9 @@ export function CapturePage() {
             <p role="status" className="text-xs text-ink-soft">
               {state.delivery
                 ? "Inserted in the original text field."
-                : "Your transcript is ready to copy below. For direct insertion on Mac, allow Vyrra in Accessibility settings and keep the text field focused."}
+                : mac
+                  ? "Your transcript is ready to copy below. For direct insertion, allow Vyrra in Accessibility settings and keep the text field focused."
+                  : "Your transcript is ready to copy below."}
             </p>
           )}
         </Card>

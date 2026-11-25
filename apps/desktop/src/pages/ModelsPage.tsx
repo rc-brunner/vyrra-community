@@ -1,262 +1,531 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import {
-  BadgeCheck,
-  Bot,
-  Boxes,
-  Brain,
-  Captions,
+  AudioLines,
   Check,
-  CloudOff,
-  Command,
-  Cpu,
+  ChevronRight,
+  CirclePlay,
   Download,
-  FileCheck2,
-  Gauge,
-  HardDrive,
+  ExternalLink,
+  FolderOpen,
+  Globe2,
+  Keyboard,
   Languages,
-  RadioTower,
-  ShieldCheck,
-  Sparkles,
-  UsersRound,
+  LoaderCircle,
+  Search,
+  Trash2,
+  X,
 } from "lucide-react";
-
+import { QuietIcon } from "../components/QuietIcon";
+import { Button, ShortcutHint } from "../components/ui";
+import { message } from "../lib/dictation";
+import { isNativeDesktop } from "../lib/native";
 import {
-  Badge,
-  Button,
-  Card,
-  InlineNotice,
-  PageHeader,
-  SectionHeading,
-  StatusDot,
-} from "../components/ui";
+  formatSize,
+  modelAction,
+  modelStatus,
+  speechModels,
+  writer,
+  writerStatus,
+  type ModelJob,
+  type ModelStatus,
+  type WriterStatus,
+} from "../lib/models";
 
-const activationChecks = [
-  { icon: BadgeCheck, label: "Approved manifest signature" },
-  { icon: FileCheck2, label: "Matching checksum and source" },
-  { icon: Boxes, label: "Compatible runtime and platform" },
-  { icon: ShieldCheck, label: "Reviewed license metadata" },
+type Action = Parameters<typeof modelAction>[1];
+type Model = { id: string; name: string; bytes: number };
+type Device = { speech: ModelStatus; writing: WriterStatus };
+const sources = [
+  {
+    id: "whisper",
+    name: "Whisper weights",
+    url: "https://huggingface.co/ggerganov/whisper.cpp/tree/5359861c739e955e79d9a303bcbc70fb988958b1",
+  },
+  {
+    id: "qwen",
+    name: "Qwen weights",
+    url: "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/tree/91cad51170dc346986eccefdc2dd33a9da36ead9",
+  },
+  {
+    id: "tokenizer",
+    name: "Qwen tokenizer",
+    url: "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct/blob/989aa7980e4cf806f80c7fef2b1adb7bc71aa306/tokenizer.json",
+  },
+] as const;
+
+function ModelRow({
+  model,
+  group,
+  active,
+  installed,
+  job,
+  disabled,
+  onAction,
+}: {
+  model: Model;
+  group: string;
+  active: boolean;
+  installed: boolean;
+  job: ModelJob | null;
+  disabled: boolean;
+  onAction: (id: string, action: Action) => Promise<void>;
+}) {
+  const [confirm, setConfirm] = useState(false);
+  const writing = model.id === writer.id;
+  const name = writing ? model.name : `Whisper ${model.name}`;
+  const fullName = writing ? name : `${name}, ${group}`;
+  const mainRef = useRef<HTMLDivElement>(null);
+  const transfer = job?.stage === "transferring" || job?.stage === "importing";
+  const percent = job
+    ? Math.min(100, Math.floor((job.received / model.bytes) * 100))
+    : 0;
+  const state = job
+    ? {
+        choosing: "Choose file",
+        importing: "Importing",
+        transferring: "Downloading",
+        verifying: "Verifying",
+      }[job.stage]
+    : active
+      ? "In use"
+      : installed
+        ? "Downloaded"
+        : "";
+  const mainLabel = job
+    ? `${state} ${fullName}`
+    : active
+      ? `${fullName} in use`
+      : installed
+        ? writing
+          ? `${name} downloaded`
+          : `Use ${fullName}`
+        : `Download ${fullName}`;
+  const settled = active || (writing && installed);
+  const Icon = writing ? Keyboard : AudioLines;
+  const undoConfirm = () => {
+    setConfirm(false);
+    requestAnimationFrame(() =>
+      mainRef.current
+        ?.querySelector<HTMLButtonElement>(".model-secondary button")
+        ?.focus(),
+    );
+  };
+  return (
+    <div
+      className="model-row"
+      data-active={active}
+      ref={mainRef}
+      onKeyDown={(e) => {
+        if (confirm && e.key === "Escape") {
+          e.preventDefault();
+          undoConfirm();
+        }
+      }}
+    >
+      <span className="model-glyph" aria-hidden="true">
+        <Icon size={17} strokeWidth={1.65} />
+      </span>
+      <div className="model-copy">
+        <span className="model-name">{name}</span>
+        <span className="model-meta">
+          {confirm ? (
+            "Remove from this device?"
+          ) : (
+            <>
+              {formatSize(model.bytes)}
+              {state && (
+                <>
+                  {" "}
+                  · {state}
+                  {job && transfer ? ` ${percent}%` : ""}
+                </>
+              )}
+              {!state && model.id === "base" && " · Default"}
+            </>
+          )}
+        </span>
+      </div>
+      <div className="model-controls">
+        {confirm ? (
+          <>
+            <QuietIcon
+              label={`Keep ${fullName}`}
+              icon={X}
+              autoFocus
+              onClick={undoConfirm}
+            />
+            <QuietIcon
+              label={`Confirm removal of ${fullName}`}
+              icon={Trash2}
+              className="model-remove"
+              onClick={() => {
+                setConfirm(false);
+                void onAction(model.id, "remove").finally(() =>
+                  mainRef.current
+                    ?.querySelector<HTMLButtonElement>(".model-primary button")
+                    ?.focus(),
+                );
+              }}
+            />
+          </>
+        ) : (
+          <>
+            <span className="model-secondary" data-busy={Boolean(job)}>
+              {job ? (
+                <QuietIcon
+                  label={`Cancel setup for ${fullName}`}
+                  icon={X}
+                  disabled={job.stage === "choosing"}
+                  onClick={() => void onAction(model.id, "cancel")}
+                />
+              ) : installed ? (
+                <QuietIcon
+                  label={`Remove ${fullName}`}
+                  icon={Trash2}
+                  disabled={disabled}
+                  onClick={() => setConfirm(true)}
+                />
+              ) : (
+                <QuietIcon
+                  label={`Import ${fullName}`}
+                  icon={FolderOpen}
+                  disabled={disabled}
+                  onClick={() => void onAction(model.id, "import")}
+                />
+              )}
+            </span>
+            <span className="model-primary">
+              <QuietIcon
+                label={mainLabel}
+                icon={
+                  job
+                    ? LoaderCircle
+                    : settled
+                      ? Check
+                      : installed
+                        ? CirclePlay
+                        : Download
+                }
+                className={job ? "vyrra-busy" : settled ? "model-check" : ""}
+                aria-busy={Boolean(job)}
+                aria-disabled={disabled || Boolean(job) || settled}
+                disabled={disabled && !job && !settled}
+                onClick={() => {
+                  if (!disabled && !job && !settled)
+                    void onAction(model.id, installed ? "use" : "download");
+                }}
+              />
+            </span>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const groups = [
+  {
+    label: "Multilingual",
+    icon: Globe2,
+    models: speechModels.filter((m) => m.languages > 1),
+  },
+  {
+    label: "English only",
+    icon: Languages,
+    models: speechModels.filter((m) => m.languages === 1),
+  },
+  { label: "Writing", icon: Keyboard, models: [writer] },
 ];
 
 export function ModelsPage() {
+  const native = isNativeDesktop();
+  const [device, setDevice] = useState<Device>();
+  const [loadError, setLoadError] = useState("");
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [announcement, setAnnouncement] = useState("");
+  const [pending, setPending] = useState<{ id: string; action: Action } | null>(
+    null,
+  );
+  const [finding, setFinding] = useState(false);
+  const [query, setQuery] = useState("");
+  const findButton = useRef<HTMLButtonElement>(null);
+  const input = useRef<HTMLInputElement>(null);
+  const mounted = useRef(false);
+  const sequence = useRef(0);
+  const refresh = useCallback(async () => {
+    const request = ++sequence.current;
+    try {
+      const [speech, writing] = await Promise.all([
+        modelStatus(),
+        writerStatus(),
+      ]);
+      if (mounted.current && request === sequence.current) {
+        setDevice({ speech, writing });
+        setLoadError("");
+      }
+      return { speech, writing };
+    } catch (e) {
+      if (mounted.current && request === sequence.current)
+        setLoadError(message(e));
+    }
+  }, []);
+  useEffect(() => {
+    mounted.current = true;
+    let stopped = false;
+    let timer: ReturnType<typeof setTimeout>;
+    async function poll() {
+      await refresh();
+      if (!stopped) timer = setTimeout(() => void poll(), 500);
+    }
+    if (native) void poll();
+    return () => {
+      stopped = true;
+      mounted.current = false;
+      clearTimeout(timer);
+    };
+  }, [native, refresh]);
+  useEffect(() => {
+    const key = (event: KeyboardEvent) => {
+      if (
+        event.key !== "/" ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.altKey ||
+        event.isComposing ||
+        (event.target instanceof Element &&
+          event.target.closest(
+            "input, textarea, select, [contenteditable=true]",
+          ))
+      )
+        return;
+      event.preventDefault();
+      setFinding(true);
+      input.current?.focus();
+    };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, []);
+  useEffect(() => {
+    if (finding) input.current?.focus();
+  }, [finding]);
+  function closeFind() {
+    setFinding(false);
+    setQuery("");
+    requestAnimationFrame(() => findButton.current?.focus());
+  }
+  async function act(id: string, action: Action) {
+    setError("");
+    setNotice("");
+    setAnnouncement("");
+    if (action !== "cancel") setPending({ id, action });
+    try {
+      await modelAction(id, action);
+      if (action === "remove") setNotice("Model removed.");
+      if (["use", "download", "import"].includes(action)) {
+        const installed = await refresh();
+        if (id === writer.id && installed?.writing.installed)
+          setAnnouncement("Writing model downloaded.");
+        else if (id === installed?.speech.active) {
+          const model = speechModels.find((m) => m.id === id);
+          if (model)
+            setAnnouncement(
+              `Whisper ${model.name}, ${model.languages === 1 ? "English only" : "Multilingual"}, is in use.`,
+            );
+        }
+      }
+    } catch (e) {
+      if (message(e) === "Model setup canceled.") setNotice(message(e));
+      else setError(message(e));
+    } finally {
+      await refresh();
+      if (action !== "cancel") setPending(null);
+    }
+  }
+  const term = query.trim().toLowerCase();
+  const visibleGroups = groups
+    .map((group) => ({
+      ...group,
+      models: group.models.filter((m) =>
+        `${group.label} ${m.id === writer.id ? "Qwen" : "Whisper"} ${m.name} ${m.id}`
+          .toLowerCase()
+          .includes(term),
+      ),
+    }))
+    .filter((group) => group.models.length);
   return (
-    <div className="space-y-9">
-      <PageHeader
-        eyebrow="AI & Models"
-        title="Capabilities appear only after they are verified."
-        description="A model name or provider logo is not evidence of support. This prototype shows the activation contract without advertising an unvalidated runtime."
-        actions={<Badge tone="warning">Catalog not connected</Badge>}
-      />
-
-      <InlineNotice tone="privacy" title="Local remains the default boundary">
-        After a compatible runtime and model are installed and verified, the
-        planned transcription path must complete with outbound network denied.
-        There is no automatic cloud fallback.
-      </InlineNotice>
-
-      <section aria-labelledby="local-runtime-heading" className="space-y-4">
-        <SectionHeading
-          id="local-runtime-heading"
-          title="Local capabilities"
-          description="Generic capability slots remain unavailable until their manifest and adapter tests pass."
-        />
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(22rem,0.75fr)]">
-          <Card className="p-5 sm:p-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div className="flex items-start gap-4">
-                <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-accent-soft text-accent">
-                  <Cpu size={20} aria-hidden="true" />
-                </span>
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="text-base font-semibold text-ink">
-                      Local transcription runtime
-                    </h2>
-                    <Badge tone="neutral">Unavailable</Badge>
-                  </div>
-                  <p className="mt-2 max-w-2xl text-sm leading-6 text-ink-soft">
-                    The desktop core will report compatible language, timing,
-                    hardware, size, license, source, and health metadata.
-                  </p>
-                </div>
-              </div>
-              <Button disabled variant="secondary">
-                <Download size={15} aria-hidden="true" />
-                Install
-              </Button>
-            </div>
-
-            <div className="mt-6 grid gap-3 border-t border-line pt-5 sm:grid-cols-3">
-              {[
-                { icon: Languages, label: "Languages", value: "Unknown" },
-                { icon: HardDrive, label: "Download", value: "Not resolved" },
-                { icon: Gauge, label: "Hardware", value: "Not probed" },
-              ].map(({ icon: Icon, label, value }) => (
-                <div
-                  key={label}
-                  className="rounded-control bg-canvas-subtle p-3"
-                >
-                  <Icon
-                    size={15}
-                    className="text-ink-faint"
-                    aria-hidden="true"
-                  />
-                  <p className="mt-2 text-[0.68rem] font-bold uppercase tracking-[0.08em] text-ink-faint">
-                    {label}
-                  </p>
-                  <p className="mt-1 text-xs font-semibold text-ink">{value}</p>
-                </div>
-              ))}
-            </div>
-          </Card>
-
-          <Card className="p-5 sm:p-6">
-            <p className="text-xs font-bold uppercase tracking-[0.12em] text-ink-faint">
-              Activation gate
-            </p>
-            <h2 className="mt-2 text-base font-semibold text-ink">
-              Four checks, fail closed
-            </h2>
-            <div className="mt-4 space-y-3">
-              {activationChecks.map(({ icon: Icon, label }) => (
-                <div
-                  key={label}
-                  className="flex items-center gap-3 rounded-control border border-line bg-surface-raised p-3"
-                >
-                  <Icon
-                    size={16}
-                    className="text-ink-faint"
-                    aria-hidden="true"
-                  />
-                  <span className="min-w-0 flex-1 text-xs font-medium text-ink">
-                    {label}
-                  </span>
-                  <StatusDot tone="neutral" />
-                </div>
-              ))}
-            </div>
-          </Card>
-        </div>
-      </section>
-
-      <section
-        aria-labelledby="advanced-model-capabilities-heading"
-        className="space-y-4"
-      >
-        <SectionHeading
-          id="advanced-model-capabilities-heading"
-          title="Advanced transcription and AI capabilities"
-          description="Each feature is gated by effective model metadata, platform support, selected execution route, and a tested adapter."
-        />
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {[
-            {
-              icon: Captions,
-              title: "Real-time transcription",
-              description:
-                "Stream provisional segments, then visibly replace them with durable final segments.",
-              requirement: "Streaming speech model",
-            },
-            {
-              icon: Languages,
-              title: "Translate to English",
-              description:
-                "Keep the source-language transcript and save translation as a revisioned derivative.",
-              requirement: "Verified translation support",
-            },
-            {
-              icon: UsersRound,
-              title: "Speaker diarization",
-              description:
-                "Expose uncertain speaker labels for review instead of presenting model guesses as identity.",
-              requirement: "Platform/model-specific",
-            },
-            {
-              icon: Sparkles,
-              title: "AI enhancement",
-              description:
-                "Apply explicitly scoped guidance without changing the preserved source transcript.",
-              requirement: "BYOK provider + preview",
-            },
-            {
-              icon: Command,
-              title: "Command Mode",
-              description:
-                "Transform selected context into a reviewable result with no implicit external authority.",
-              requirement: "Reasoning + authorization",
-            },
-            {
-              icon: Brain,
-              title: "Memory and instructions",
-              description:
-                "Use only user-reviewed, scoped context with provenance and clear removal controls.",
-              requirement: "Protected settings store",
-            },
-          ].map(({ icon: Icon, title, description, requirement }) => (
-            <Card key={title} className="p-5">
-              <div className="flex items-start justify-between gap-3">
-                <span className="grid size-10 place-items-center rounded-xl bg-surface-strong text-ink-soft">
-                  <Icon size={18} aria-hidden="true" />
-                </span>
-                <Badge tone="warning">Unavailable</Badge>
-              </div>
-              <h3 className="mt-4 text-sm font-semibold text-ink">{title}</h3>
-              <p className="mt-2 text-sm leading-6 text-ink-soft">
-                {description}
-              </p>
-              <p className="mt-4 flex items-center gap-2 border-t border-line pt-3 text-[0.7rem] font-semibold text-ink-faint">
-                <RadioTower size={14} aria-hidden="true" />
-                {requirement}
-              </p>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      <section aria-labelledby="reasoning-heading" className="space-y-4">
-        <SectionHeading
-          id="reasoning-heading"
-          title="Optional reasoning"
-          description="Meeting readiness never depends on a summary engine."
-        />
-        <Card className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-          <div className="flex items-start gap-4">
-            <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-surface-strong text-ink-soft">
-              <Bot size={20} aria-hidden="true" />
-            </span>
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-base font-semibold text-ink">
-                  Summary capability
-                </h2>
-                <Badge tone="neutral">Not configured</Badge>
-              </div>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-ink-soft">
-                When available, derived artifacts must name exact source
-                revisions, execution location, model, template, time, citations,
-                and user edits.
-              </p>
-            </div>
-          </div>
-          <span className="flex shrink-0 items-center gap-2 text-xs font-semibold text-success">
-            <Check size={16} aria-hidden="true" />
-            Transcript remains usable
-          </span>
-        </Card>
-      </section>
-
-      <Card className="flex items-start gap-4 p-5">
-        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-success-soft text-success">
-          <CloudOff size={18} aria-hidden="true" />
-        </span>
+    <div className="model-page">
+      <header className="model-header">
         <div>
-          <h2 className="text-sm font-semibold text-ink">
-            Cloud connections stay hidden
-          </h2>
-          <p className="mt-1.5 text-sm leading-6 text-ink-soft">
-            No provider manifest or live adapter suite has passed, so this
-            prototype does not display a decorative provider catalog.
-          </p>
+          <h1 className="vyrra-page-title">Models</h1>
+          <p>Download once. Dictate and write offline.</p>
         </div>
-      </Card>
+        {finding ? (
+          <div className="model-search">
+            <Search size={14} aria-hidden="true" />
+            <input
+              ref={input}
+              type="search"
+              aria-label="Find a model"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Find a model"
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  e.preventDefault();
+                  closeFind();
+                }
+              }}
+            />
+            <QuietIcon label="Close search" icon={X} onClick={closeFind} />
+          </div>
+        ) : (
+          <button
+            ref={findButton}
+            className="vyrra-button model-find"
+            type="button"
+            aria-keyshortcuts="/"
+            onClick={() => setFinding(true)}
+          >
+            <Search size={14} aria-hidden="true" />
+            Find<ShortcutHint>/</ShortcutHint>
+          </button>
+        )}
+      </header>
+      {!native && (
+        <p className="model-note">
+          Open Vyrra Desktop to install models on this device.
+        </p>
+      )}
+      {native && !device && !loadError && (
+        <p role="status" className="model-note">
+          Checking installed models…
+        </p>
+      )}
+      {device && !device.speech.idle && (
+        <p role="status" className="model-note">
+          Finish dictation to change speech models.
+        </p>
+      )}
+      {(error || loadError) && (
+        <p role="alert" className="model-error">
+          {error || loadError}
+        </p>
+      )}
+      <div role="status" className={notice ? "model-note" : "sr-only"}>
+        {notice || announcement}
+      </div>
+      {visibleGroups.map(({ label, icon: Icon, models: visible }) => {
+        return (
+          <section key={label} aria-label={label} className="model-group">
+            <h2>
+              <Icon size={14} aria-hidden="true" />
+              {label}
+            </h2>
+            <div className="model-grid">
+              {visible.map((model) => {
+                const writing = model.id === writer.id;
+                const waiting =
+                  pending?.id === model.id &&
+                  ["download", "import", "use"].includes(pending.action);
+                const speechJob = device?.speech.job;
+                const job =
+                  writing && device?.writing.installing
+                    ? {
+                        id: model.id,
+                        stage:
+                          device.writing.received >= device.writing.bytes
+                            ? ("verifying" as const)
+                            : pending?.action === "import"
+                              ? ("importing" as const)
+                              : ("transferring" as const),
+                        received: device.writing.received,
+                      }
+                    : speechJob?.id === model.id
+                      ? speechJob
+                      : waiting
+                        ? {
+                            id: model.id,
+                            stage:
+                              pending?.action === "use"
+                                ? ("verifying" as const)
+                                : pending?.action === "import"
+                                  ? ("choosing" as const)
+                                  : ("transferring" as const),
+                            received: 0,
+                          }
+                        : null;
+                return (
+                  <ModelRow
+                    key={model.id}
+                    model={model}
+                    group={label}
+                    job={job}
+                    installed={
+                      writing
+                        ? Boolean(device?.writing.installed)
+                        : Boolean(device?.speech.installed.includes(model.id))
+                    }
+                    active={!writing && device?.speech.active === model.id}
+                    disabled={
+                      !device ||
+                      Boolean(loadError) ||
+                      Boolean(pending) ||
+                      (writing
+                        ? device.writing.busy
+                        : !device.speech.idle || Boolean(speechJob))
+                    }
+                    onAction={act}
+                  />
+                );
+              })}
+            </div>
+          </section>
+        );
+      })}
+      {!visibleGroups.length && (
+        <p className="model-note">No matching models.</p>
+      )}
+      <details className="model-sources">
+        <summary>
+          <ChevronRight size={14} aria-hidden="true" />
+          Sources &amp; files
+        </summary>
+        <div>
+          {sources.map((source) => (
+            <a
+              key={source.id}
+              href={source.url}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(event) => {
+                if (native) {
+                  event.preventDefault();
+                  void invoke("model_source", { source: source.id }).catch(
+                    (e) => setError(message(e)),
+                  );
+                }
+              }}
+            >
+              {source.name}
+              <ExternalLink size={12} aria-hidden="true" />
+            </a>
+          ))}
+          {native && (
+            <Button
+              variant="quiet"
+              onClick={() =>
+                void invoke("model_source", { source: "folder" }).catch((e) =>
+                  setError(message(e)),
+                )
+              }
+            >
+              <FolderOpen size={14} />
+              Open models folder
+            </Button>
+          )}
+        </div>
+      </details>
     </div>
   );
 }

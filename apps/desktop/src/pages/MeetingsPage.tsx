@@ -49,7 +49,7 @@ function AddMeeting({
     [owner, setOwner] = useState(""),
     [file, setFile] = useState(""),
     [loaded, setLoaded] = useState(false),
-    [mode, setMode] = useState<MeetingMode>("local"),
+    [mode, setMode] = useState<MeetingMode>(view.sources.length ? "local" : "participant"),
     [consent, setConsent] = useState(false),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
@@ -181,7 +181,7 @@ function AddMeeting({
                 setConsent(false);
               }}
             >
-              <option value="local">This computer</option>
+              {view.sources.length > 0 && <option value="local">This computer</option>}
               <option value="participant">
                 {view.profile.name} · self-hosted participant
               </option>

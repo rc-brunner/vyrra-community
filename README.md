@@ -21,6 +21,8 @@ The desktop app includes a microphone, push-to-talk and hands-free shortcuts, WA
 
 Read how the Windows app handles audio, saved transcripts, model downloads and optional meeting participants in [Windows privacy](docs/windows-privacy.md).
 
+The next desktop release adds **Models** to the sidebar, with ten Whisper speech models and the optional Qwen writing model. [Model downloads and desktop controls](docs/desktop-interactions.md).
+
 ## Meetings and feedback
 
 Choose an accepted calendar call to open locally, or schedule a named participant on your own Attendee server. Choose a participant picture under **Settings → Meetings**. The local writing model supports summaries and transcript questions. Core dictation stays free and uncapped. See the setup and platform limits in the [meeting guide](docs/meetings.md).
