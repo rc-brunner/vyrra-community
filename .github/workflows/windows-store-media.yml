@@ -73,7 +73,7 @@ jobs:
           PREVIEW_IMAGE: ${{ matrix.image }}
         run: |
           $ErrorActionPreference = 'Stop'
-          $run = '45559464626'
+          $run = '45562665138'
           $repository = $env:GITHUB_REPOSITORY
           gh run download $run --repo $repository --name vyrra-Windows-x64 --dir package
           if ($LASTEXITCODE) { throw 'Installer download failed.' }

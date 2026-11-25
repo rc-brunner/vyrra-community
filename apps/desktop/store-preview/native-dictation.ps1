@@ -61,9 +61,11 @@ try {
     $started = [DateTime]::UtcNow
     Open-Control $picker
     if (-not $pickerJob.WaitForExit(40000) -or $pickerJob.ExitCode -ne 0) { throw 'The Windows file picker did not select the prepared sentence.' }
+    $fileSelected = [DateTime]::UtcNow
     $transcript = Wait-Control 'Transcript' 240 'Edit'
     $content = $transcript.GetCurrentPattern([Windows.Automation.ValuePattern]::Pattern).Current.Value
     if ($content -notmatch 'blue notebook' -or $content -notmatch 'design review') { throw "Unexpected synthetic transcript: $content" }
+    Write-Output "The verified transcript appeared $([math]::Round(([DateTime]::UtcNow - $fileSelected).TotalSeconds,1)) seconds after the file picker returned."
     Write-Output "The Windows release transcribed the blue notebook and design review phrases in $([math]::Round(([DateTime]::UtcNow - $started).TotalSeconds,1)) seconds including file selection."
     Open-Control (Wait-Control 'Save to Library')
     $null = Wait-Control 'Saved on this device.'
