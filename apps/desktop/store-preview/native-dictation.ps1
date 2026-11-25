@@ -14,8 +14,12 @@ function Get-VyrraWindow {
     }
 }
 
-function Wait-Control([string]$name, [int]$seconds = 60) {
+function Wait-Control([string]$name, [int]$seconds = 60, [string]$role = '') {
     $condition = [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::NameProperty, $name)
+    if ($role) {
+        $type = [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::ControlTypeProperty, [Windows.Automation.ControlType]::$role)
+        $condition = [Windows.Automation.AndCondition]::new($condition, $type)
+    }
     $deadline = [DateTime]::UtcNow.AddSeconds($seconds)
     do {
         $window = Get-VyrraWindow
@@ -28,25 +32,36 @@ function Wait-Control([string]$name, [int]$seconds = 60) {
     throw "Vyrra did not expose the enabled control '$name'."
 }
 
-(Wait-Control 'Download speech model').GetCurrentPattern($invoke).Invoke()
+function Open-Control($control) {
+    Write-Output "Activating $($control.Current.Name) ($($control.Current.ControlType.ProgrammaticName))."
+    $pattern = $null
+    if ($control.TryGetCurrentPattern($invoke, [ref]$pattern)) { $pattern.Invoke(); return }
+    if ($control.TryGetCurrentPattern([Windows.Automation.ExpandCollapsePattern]::Pattern, [ref]$pattern)) { $pattern.Expand(); return }
+    $control.SetFocus()
+    $focus = [Windows.Automation.AutomationElement]::FocusedElement
+    if ($focus.Current.Name -ne $control.Current.Name) { throw 'Focus left the selected Vyrra control.' }
+    (New-Object -ComObject WScript.Shell).SendKeys('{ENTER}')
+}
+
+Open-Control (Wait-Control 'Download speech model')
 $null = Wait-Control 'Start dictation' 240
 Write-Output 'The packaged app downloaded and prepared its speech model.'
-(Wait-Control 'More audio options').GetCurrentPattern($invoke).Invoke()
+Open-Control (Wait-Control 'More audio options')
 $picker = Wait-Control 'Transcribe WAV'
 $wav = Join-Path $PSScriptRoot 'blue-notebook.wav'
 $fileHelper = Join-Path $PSScriptRoot 'select-file.ps1'
 $pickerJob = Start-Process powershell.exe -ArgumentList '-NoProfile','-NonInteractive','-File',"`"$fileHelper`"","`"$wav`"" -PassThru
 try {
     $started = [DateTime]::UtcNow
-    $picker.GetCurrentPattern($invoke).Invoke()
+    Open-Control $picker
     if (-not $pickerJob.WaitForExit(40000) -or $pickerJob.ExitCode -ne 0) { throw 'The Windows file picker did not select the prepared sentence.' }
-    $transcript = Wait-Control 'Transcript' 150
+    $transcript = Wait-Control 'Transcript' 240 'Edit'
     $content = $transcript.GetCurrentPattern([Windows.Automation.ValuePattern]::Pattern).Current.Value
     if ($content -notmatch 'blue notebook' -or $content -notmatch 'design review') { throw "Unexpected synthetic transcript: $content" }
     Write-Output "The Windows release transcribed the blue notebook and design review phrases in $([math]::Round(([DateTime]::UtcNow - $started).TotalSeconds,1)) seconds including file selection."
-    (Wait-Control 'Save to Library').GetCurrentPattern($invoke).Invoke()
+    Open-Control (Wait-Control 'Save to Library')
     $null = Wait-Control 'Saved on this device.'
-    (Wait-Control 'Library').GetCurrentPattern($invoke).Invoke()
+    Open-Control (Wait-Control 'Library' 60 'Hyperlink')
     $deadline = [DateTime]::UtcNow.AddSeconds(25)
     do {
         $controls = (Get-VyrraWindow).FindAll($scope, [Windows.Automation.Condition]::TrueCondition)

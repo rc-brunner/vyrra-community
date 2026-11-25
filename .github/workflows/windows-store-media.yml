@@ -16,8 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { image: windows-2022, sample: a }
-          - { image: windows-2022, sample: b }
+          - { image: windows-2025, sample: c }
     runs-on: ${{ matrix.image }}
     timeout-minutes: 15
     steps:
