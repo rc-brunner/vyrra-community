@@ -11,13 +11,12 @@ import {
   Mic,
   Pause,
   Play,
-  Square,
   X,
 } from "lucide-react";
 
 import { QuietIcon } from "../components/QuietIcon";
 import { RecorderPill } from "../components/RecorderPill";
-import { Button, Card, PageHeader, ShortcutHint } from "../components/ui";
+import { Button, Card, PageHeader, ShortcutButton } from "../components/ui";
 import {
   dictate,
   importAudio,
@@ -186,31 +185,20 @@ export function CapturePage() {
             action={
               <div className="recorder-actions flex items-center gap-1">
                 {(!busy || recording) && (
-                  <button
+                  <ShortcutButton
                     ref={primary}
-                    type="button"
-                    className="vyrra-button recorder-primary"
+                    className="recorder-primary"
                     disabled={!ready || choosing}
                     aria-label={
                       recording ? "Finish dictation" : "Start dictation"
                     }
-                    aria-keyshortcuts={mac ? "Meta+Enter" : "Control+Enter"}
+                    shortcut={mac ? "Meta+Enter" : "Control+Enter"}
                     onClick={() =>
                       void run(() => dictate(recording ? "finish" : "start"))
                     }
                   >
-                    {recording ? (
-                      <Square
-                        size={13}
-                        fill="currentColor"
-                        aria-hidden="true"
-                      />
-                    ) : (
-                      <Mic size={15} aria-hidden="true" />
-                    )}
                     {recording ? "Finish" : "Dictate"}
-                    <ShortcutHint>{mac ? "⌘ ↵" : "Ctrl ↵"}</ShortcutHint>
-                  </button>
+                  </ShortcutButton>
                 )}
                 {recording && (
                   <QuietIcon

@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from "react";
+import type { ButtonHTMLAttributes, ComponentPropsWithRef, HTMLAttributes, ReactNode } from "react";
 import { ArrowRight, CircleAlert, Info, LockKeyhole } from "lucide-react";
 
 import { cn } from "../lib/cn";
@@ -13,8 +13,32 @@ const buttonVariantClasses: Record<ButtonVariant, string> = {
   danger: "bg-danger text-surface-raised hover:opacity-90",
 };
 
-export function ShortcutHint({ children }: { children: ReactNode }) {
-  return <kbd aria-hidden="true" className="vyrra-kbd">{children}</kbd>;
+const shortcutKeys = {
+  "Meta+Enter": ["⌘", "↩︎"],
+  "Control+Enter": ["Ctrl", "Enter"],
+  "/": ["/"],
+} as const;
+
+export function ShortcutButton({
+  shortcut,
+  children,
+  className,
+  type = "button",
+  ...props
+}: ComponentPropsWithRef<"button"> & { shortcut: keyof typeof shortcutKeys }) {
+  return (
+    <button
+      {...props}
+      type={type}
+      className={cn("vyrra-button vyrra-shortcut-button", className)}
+      aria-keyshortcuts={shortcut}
+    >
+      <span>{children}</span>
+      <span aria-hidden="true" className="vyrra-shortcut-keys">
+        {shortcutKeys[shortcut].map((key) => <kbd key={key}>{key}</kbd>)}
+      </span>
+    </button>
+  );
 }
 
 export function Button({

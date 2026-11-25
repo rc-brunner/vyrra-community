@@ -219,7 +219,36 @@
 .vyrra-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 4px 10px; line-height: 1.54; transition: background-color var(--vyrra-feedback) var(--vyrra-ease-out), color var(--vyrra-feedback) var(--vyrra-ease-out); }
 .vyrra-nav { transition: background-color var(--vyrra-feedback) var(--vyrra-ease-out); }
 .vyrra-button svg { flex: none; }
-.vyrra-kbd { display: inline-flex; align-items: center; justify-content: center; gap: 2px; margin-inline-start: 3px; min-width: 16px; padding: 0 4px; border: 1px solid color-mix(in srgb,currentColor 24%,transparent); border-radius: 4px; font: 500 .6875rem/1.36 ui-monospace,monospace; letter-spacing: 0; white-space: nowrap; }
+.vyrra-shortcut-button {
+  min-height: 28px;
+  gap: 8px;
+  padding: 4px 5px 4px 10px;
+  line-height: 1.385;
+  font-weight: 500;
+}
+.vyrra-shortcut-keys {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  gap: 2px;
+  transition: transform var(--vyrra-press) var(--vyrra-ease-in-out);
+}
+.vyrra-shortcut-keys kbd {
+  --key-size: 1.125rem;
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: var(--key-size);
+  min-block-size: var(--key-size);
+  padding-inline: 2px;
+  border: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: .75rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+.vyrra-shortcut-button:active:enabled .vyrra-shortcut-keys { transform: translateY(1px); }
 .model-page { width: 100%; max-width: 980px; margin-inline: auto; }
 .model-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding-block-end: 17px; border-bottom: 1px solid var(--pvw-line); }
 .model-header p, .model-note, .model-error { margin-top: 5px; font-size: var(--vyrra-label); line-height: 1.5; color: var(--pvw-ink-soft); }
@@ -266,12 +295,14 @@
 }
 @media(hover:none), (any-pointer:coarse) {
   :root { --vyrra-control: 44px; --vyrra-row: 56px; }
+  .vyrra-shortcut-button { min-height: var(--vyrra-control); }
   .model-row .model-secondary { opacity: 1; pointer-events: auto; }
   .model-sources a, .model-sources summary { min-height: 44px; }
 }
 @media(prefers-reduced-motion:reduce) {
   :root { --vyrra-press: 0ms; --vyrra-feedback: 0ms; --vyrra-enter: 0ms; --vyrra-meter: 0ms; }
   .vyrra-busy svg, .vyrra-wave-bar { animation: none !important; }
+  .vyrra-shortcut-button:active:enabled .vyrra-shortcut-keys { transform: none; }
 }
 
 .vyrra-icon svg, .vyrra-button > svg { transition: transform var(--vyrra-press) var(--vyrra-ease-in-out); }

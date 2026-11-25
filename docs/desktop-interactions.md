@@ -6,12 +6,14 @@ In the desktop source with the **Models** sidebar item, users can download, impo
 
 The default desktop control is 32 × 32 pixels for an icon or 32 pixels high for a labeled button. Use a 16-pixel outline icon, an 8-pixel control radius and a visible 2-pixel focus ring. The 52-pixel model row has a 28-pixel glyph, model name, file size and a right-aligned primary action. Reserve the secondary action’s space even when hidden. On touch, controls grow to 44 pixels and rows to at least 56 pixels. Text can wrap and rows can grow at larger font sizes.
 
-Use the app’s Inter and system sans-serif stack. At the default text size, page headings are 24/30 pixels, model names are 13/18, metadata is 12/16, and keycaps are 11/15. Line heights scale with the text. The catalog fits up to two columns and switches to one when two 17-rem rows would crowd the controls. File sizes use decimal units. Use tabular numerals for transfer progress and elapsed time. Selection has a check and the words “In use” in both themes.
+Use the app’s Inter and system sans-serif stack. At the default text size, page headings are 24/30 pixels, model names are 13/18, and metadata is 12/16. Line heights scale with the text. The catalog fits up to two columns and switches to one when two 17-rem rows would crowd the controls. File sizes use decimal units. Use tabular numerals for transfer progress and elapsed time. Selection has a check and the words “In use” in both themes.
+
+Shortcut buttons are 28 pixels high on desktop and at least 44 on touch. The action label comes first, followed by an 8-pixel gap and one outlined keycap per physical key. Each cap is at least 18 pixels square with 12-pixel type, a 4-pixel radius and a 2-pixel gap to the next cap. Longer key names expand horizontally. The whole button has one focus stop and one accessible shortcut.
 
 | Interaction | Response |
 | --- | --- |
 | Hover or keyboard focus | Reveal import or remove beside the main action. Fine pointers get a tooltip after 350 ms. Keyboard focus shows it immediately. Touch exposes the actions directly. |
-| Press | Compress only the glyph to 92–94% for 80 ms. Its hit area stays fixed. |
+| Press | An icon compresses to 92–94%. A shortcut button lowers its keycaps by 1 pixel. Both take 80 ms and keep the hit area fixed. Reduced motion keeps the keycaps still. |
 | Hover and state changes | Change color and opacity over 120 ms. Preserve row geometry and focus order. |
 | Panel, tooltip and disclosure | The panel fades in and settles by 2 pixels over 160 ms. A disclosure chevron turns in the same time. Text becomes available immediately. |
 | Download | The download glyph becomes a spinner inside the same button. Show bytes as a percentage. Import, verification and activation have distinct labels. Keep Cancel beside an active transfer. |
