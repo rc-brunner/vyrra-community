@@ -15,7 +15,7 @@ If you install the direct Android APK, use GitHub for updates. The Google Play e
 
 ## Desktop
 
-Install Node as specified in `.node-version`, pnpm 10.14.0, the Rust toolchain in `rust-toolchain.toml`, CMake, Clang, and the platform prerequisites for Tauri 2. From the repository root, run `pnpm install --frozen-lockfile` followed by `pnpm dev`. On first use, choose **Download speech model** or select the verified multilingual Whisper base file. The first download is approximately 148 MB.
+Install Node as specified in `.node-version`, pnpm 10.14.0, the Rust toolchain in `rust-toolchain.toml`, CMake 3.19 or later, Clang, and the platform prerequisites for Tauri 2. From the repository root, run `pnpm install --frozen-lockfile` followed by `pnpm dev`. On first use, choose **Download speech model** or select the verified multilingual Whisper base file. The first download is approximately 148 MB.
 
 The desktop app includes a microphone, push-to-talk and hands-free shortcuts, WAV import, a personal dictionary, spoken snippets, and an editable local transcript library. Allow macOS microphone access for dictation and Accessibility access for insertion into other apps. A transcript remains available to copy when insertion is unavailable.
 

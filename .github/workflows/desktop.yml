@@ -50,9 +50,33 @@ jobs:
               raise SystemExit('Missing speech engine build configuration')
           for cache in caches:
               flags = dict(re.findall(r'^GGML_(\w+):BOOL=(\w+)$', cache.read_text(encoding='utf-8'), re.M))
+              if flags.get('LLAMAFILE') != 'ON':
+                  raise SystemExit('Missing runtime-selected speech matrix kernel')
               for feature in 'NATIVE SSE42 AVX AVX2 FMA F16C BMI2 AVX_VNNI AVX512 AVX512_VBMI AVX512_VNNI AVX512_BF16 AMX_TILE AMX_INT8 AMX_BF16'.split():
                   if flags.get(feature) != 'OFF':
                       raise SystemExit(f'{cache}: expected GGML_{feature}=OFF, found {flags.get(feature)}')
+      - name: Transcribe a known sentence with the release speech engine
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $env:VYRRA_TEST_MODEL = Join-Path $env:RUNNER_TEMP 'vyrra-test-model.bin'
+          $env:VYRRA_TEST_WAV = Join-Path $env:RUNNER_TEMP 'vyrra-test-sentence.wav'
+          curl.exe --fail --location --retry 3 --silent --show-error 'https://huggingface.co/ggerganov/whisper.cpp/resolve/5359861c739e955e79d9a303bcbc70fb988958b1/ggml-base.bin' -o $env:VYRRA_TEST_MODEL
+          if ($LASTEXITCODE) { throw 'The pinned speech model could not be downloaded.' }
+          Add-Type -AssemblyName System.Speech
+          $voice = [System.Speech.Synthesis.SpeechSynthesizer]::new()
+          try {
+            $voice.SetOutputToWaveFile($env:VYRRA_TEST_WAV)
+            $voice.Speak('Please bring the blue notebook to the meeting on Friday.')
+          } finally { $voice.Dispose() }
+          $messages = cargo test --release --locked --manifest-path apps/desktop/src-tauri/Cargo.toml --lib --no-run --message-format=json
+          if ($LASTEXITCODE) { throw 'The release integration test could not be compiled.' }
+          $binary = $messages | ForEach-Object { $_ | ConvertFrom-Json } | Where-Object { $_.target.name -eq 'vyrra_desktop_lib' -and $_.executable } | Select-Object -Last 1 -ExpandProperty executable
+          if (-not $binary) { throw 'The release test executable was not found.' }
+          $case = Start-Process $binary -ArgumentList '--ignored','--exact','dictation::tests::desktop_decodes_known_speech_offline' -NoNewWindow -PassThru
+          if (-not $case.WaitForExit(90000)) { $case.Kill(); throw 'Speech recognition exceeded 90 seconds for the short sentence.' }
+          if ($case.ExitCode -ne 0) { throw 'The release engine did not produce the expected transcript.' }
       - name: Install Linux package on a clean Ubuntu image
         if: runner.os == 'Linux'
         run: |
