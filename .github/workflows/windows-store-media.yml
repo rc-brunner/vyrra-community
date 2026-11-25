@@ -16,6 +16,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - { image: windows-2022, sample: a }
+          - { image: windows-2022, sample: b }
           - { image: windows-2025, sample: c }
     runs-on: ${{ matrix.image }}
     timeout-minutes: 15
@@ -71,7 +73,7 @@ jobs:
           PREVIEW_IMAGE: ${{ matrix.image }}
         run: |
           $ErrorActionPreference = 'Stop'
-          $run = '45553046930'
+          $run = '45559464626'
           $repository = $env:GITHUB_REPOSITORY
           gh run download $run --repo $repository --name vyrra-Windows-x64 --dir package
           if ($LASTEXITCODE) { throw 'Installer download failed.' }

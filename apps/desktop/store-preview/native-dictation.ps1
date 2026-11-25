@@ -22,10 +22,16 @@ function Wait-Control([string]$name, [int]$seconds = 60, [string]$role = '') {
     }
     $deadline = [DateTime]::UtcNow.AddSeconds($seconds)
     do {
-        $window = Get-VyrraWindow
-        if ($null -ne $window) {
-            $control = $window.FindFirst($scope, $condition)
-            if ($null -ne $control -and $control.Current.IsEnabled) { return $control }
+        try {
+            $window = Get-VyrraWindow
+            if ($null -ne $window) {
+                $control = $window.FindFirst($scope, $condition)
+                if ($null -ne $control -and $control.Current.IsEnabled) { return $control }
+            }
+        } catch {
+            # Closing the native file picker briefly replaces the UI Automation root.
+            $cause = $_.Exception.GetBaseException()
+            if ($cause -isnot [Windows.Automation.ElementNotAvailableException] -and $cause.HResult -ne -2147220991) { throw }
         }
         Start-Sleep -Milliseconds 350
     } while ([DateTime]::UtcNow -lt $deadline)
